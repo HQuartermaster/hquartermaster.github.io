@@ -34,6 +34,10 @@
             <div class="status" id="status-bar">READY</div>
         </header>
 
+         <span id="sidebar-button">
+            <i class="fa fa-bars"></i>
+        </span>
+
         <nav id="sidebar">
             <div class="sidebar-section-label">Navigator</div>
             <div class="tree-root" id="tree-root">
@@ -54,11 +58,11 @@
 
         <footer id="footer">
             <div class="breadcrumb">
-                <span><i class="fa fa-plus"></i>&nbsp;Created: </span>
+                <span><i class="fa fa-plus"></i>&nbsp;</span>
                 <span id="date-created"></span>
             </div>
             <div class="breadcrumb">
-                <span><i class="fa fa-sync"></i>&nbsp;Updated: </span>
+                <span><i class="fa fa-sync"></i>&nbsp;</span>
                 <span id="date-modified"></span>
             </div>
         </footer>
@@ -309,9 +313,9 @@
 
         /*
             Function to convert UNIX timestamp to a nicely
-            formatted string in IST.
+            formatted string.
         */
-        function unixTimestampToNiceIST(ts, locale = "en-IN") {
+        function unixTimestampToNice(ts, locale = "en-IN") {
             // Convert UNIX (seconds -> milliseconds)
             const date = new Date(ts * 1000);
 
@@ -339,15 +343,39 @@
                 if (p.type === "dayPeriod") dayPeriod = p.value;
             });
 
-            return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod} (IST)`;
+            return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod.toUpperCase()}`;
         }
 
+        function unixTimeStampToShort(ts, locale = "en-IN") {
+            const date = new Date(ts * 1000);
+            const options = {
+                timeZone: "Asia/Kolkata",
+                day: "numeric",
+                month: "2-digit",
+                year: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            };
+            const parts = new Intl.DateTimeFormat(locale, options).formatToParts(date);
+
+            parts.forEach(p => {
+                if (p.type === "day") day = p.value;
+                if (p.type === "month") month = p.value;
+                if (p.type === "year") year = p.value;
+                if (p.type === "hour") hour = p.value;
+                if (p.type === "minute") minute = p.value;
+            });
+
+            return `${day}.${month}.${year} ${hour}:${minute}`;
+        }
         /* 
             Set the created and modified time in the bottom bar.
         */
         function setCreatedModifiedTime(c_time, m_time) {
-            document.getElementById('date-created').textContent = unixTimestampToNiceIST(c_time);
-            document.getElementById('date-modified').textContent = unixTimestampToNiceIST(m_time);
+            var timeStampFunc = window.matchMedia("(max-width: 699px)").matches ? unixTimeStampToShort : unixTimestampToNice;
+            document.getElementById('date-created').textContent = timeStampFunc(c_time);
+            document.getElementById('date-modified').textContent = timeStampFunc(m_time);
         }
 
         function handleRoute() {
@@ -396,6 +424,10 @@
                 window.location.hash = '/index.md';
             else
                 handleRoute();
+            
+            document.getElementById('sidebar-button').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('closed');
+            }); 
         }
 
         boot();
