@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>blog_title</title>
+
+    <!-- Marked (Markdown parser) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+    <!-- Highlight.js (syntax highlighting) -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- KaTeX (LaTeX math) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div id="app">
+        <header id="header">
+            <div class="logo" id="blog-title">Sample Title</div>
+            <div class="breadcrumb" id="breadcrumb">
+                <span class="sep">/#/</span>
+                <span class="current" id="bc-path">index</span>
+            </div>
+            <div class="status" id="status-bar">READY</div>
+        </header>
+
+        <nav id="sidebar">
+            <div class="sidebar-section-label">Navigator</div>
+            <div class="tree-root" id="tree-root">
+                <!-- populated by JS -->
+            </div>
+        </nav>
+
+        <main id="main">
+            <div id="loading">
+                <div class="spinner"></div>
+                <span>Initialising...</span>
+            </div>
+            <div id="error-state"></div>
+            <div id="content" style="display:none">
+                <div class="md-body" id="md-body"></div>
+            </div>
+        </main>
+
+        <footer id="footer">
+            <div class="breadcrumb">
+                <span><i class="fa fa-plus"></i>&nbsp;Created: </span>
+                <span id="date-created"></span>
+            </div>
+            <div class="breadcrumb">
+                <span><i class="fa fa-sync"></i>&nbsp;Updated: </span>
+                <span id="date-modified"></span>
+            </div>
+        </footer>
+
+        <!-- Noise filter for glass texture -->
+        <svg width="0" height="0">
+            <filter id="noise-filter">
+                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+            </filter>
+        </svg>
+    </div>
+
+    <script>
+        var IMAGES_ROOT = '/images'; // root for image src in MD files
+        var BLOGDATA_JSON = null;
+        var ROOT_PATH_PREFIX = "";
+        /* 
+            State
+        */
+        let current_file = null;
+        let file_loader_functions = {};
+        /* 
+            Marked for rendering markdown.
+        */
+        marked.setOptions({
+            highlight: (code, lang) => {
+                if (lang && hljs.getLanguage(lang)) {
+                    return hljs.highlight(code, { language: lang }).value;
+                }
+                return hljs.highlightAuto(code).value;
+            },
+            langPrefix: 'hljs language-',
+            breaks: false,
+            gfm: true,
+        });
+
+        // Custom renderer to fix image paths
+        const renderer = new marked.Renderer();
+        renderer.image = (href, title, text) => {
+            // Strip leading ./ or / from href, resolve against images root
+            const clean = href.replace(/^\.?\//, '');
+            const resolved = clean.startsWith('http') ? href : `${IMAGES_ROOT}/${clean}`;
+            const titleAttr = title ? ` title="${title}"` : '';
+            return `<img src="${resolved}" alt="${text}"${titleAttr} loading="lazy">`;
+        };
+        marked.use({ renderer });
+
+        /* 
+            Build the sidebar tree.
+        */
+        function buildTree(node, pathPrefix, depth) {
+            const frag = document.createDocumentFragment();
+
+            // Files at this level
+            (node.files || []).forEach(fileobj => {
+                const fname = fileobj.name;
+                const route_path = `${pathPrefix}/${fname}`;
+                const el = document.createElement('div');
+                el.className = 'tree-file';
+                el.dataset.path = route_path;
+                const label = fname.replace(/\.md$/i, '');
+                el.innerHTML = `<i class="fa-solid fa-file"></i>${label}`;
+
+                /* 
+                    Add this to the file loader functions. This is used by window.location.hashchanged.
+                    We simply change the window hash on click.
+                */
+                file_loader_functions[route_path] = () => {
+                    setCreatedModifiedTime(fileobj.timestamp_created, fileobj.timestamp_modified);
+                    const full_path = `${ROOT_PATH_PREFIX}/${route_path}`;
+                    loadFile(full_path, el);
+                }
+
+                el.addEventListener('click', () => {
+                    window.location.hash = route_path;
+                });
+                frag.appendChild(el);
+            });
+
+            // Subdirectories
+            (node.dirs || []).forEach(dir => {
+                const folderEl = document.createElement('div');
+                folderEl.id = `folder-element${(pathPrefix + '/' + dir.name).replaceAll("/", "-")}`;
+                folderEl.className = 'tree-folder';
+                const headerEl = document.createElement('div');
+                headerEl.className = 'tree-folder-header';
+                headerEl.innerHTML = `
+      <span class="arrow">
+        <i class="fa fa-angle-right"></i>
+      </span>
+      <i class="fa fa-folder"></i>
+      <span class="folder-name">${dir.name}</span>`;
+                headerEl.addEventListener('click', () => folderEl.classList.toggle('open'));
+                const childrenEl = document.createElement('div');
+                childrenEl.className = 'tree-children';
+                childrenEl.appendChild(buildTree(dir, `${pathPrefix}/${dir.name}`, depth + 1));
+                folderEl.appendChild(headerEl);
+                folderEl.appendChild(childrenEl);
+                frag.appendChild(folderEl);
+            });
+
+            return frag;
+        }
+
+        async function loadConfig() {
+            const response = await fetch('./config.json');
+            const data = await response.json();
+
+            document.getElementById("blog-title").textContent = data.blog_title;
+            document.title = data.web_title;
+        }
+
+        async function populateSidebar() {
+            const root = document.getElementById('tree-root');
+
+            const response = await fetch('./data.json');
+            const data = await response.json();
+
+            BLOGDATA_JSON = data;
+            ROOT_PATH_PREFIX = `./${data.name}`;
+            IMAGES_ROOT = `${ROOT_PATH_PREFIX}${IMAGES_ROOT}`;
+
+            root.appendChild(buildTree(data, "", 0));
+        }
+        /* 
+            Load a markdown file given path.
+        */
+        async function loadFile(path, triggerEl) {
+            setStatus('LOADING');
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error-state').style.display = 'none';
+
+            // Update active state in sidebar
+            document.querySelectorAll('.tree-file.active').forEach(el => el.classList.remove('active'));
+            if (triggerEl) triggerEl.classList.add('active');
+            current_file = path;
+
+            // Update breadcrumb
+            const parts = path.replace(ROOT_PATH_PREFIX + '/', '').replace(/\.md$/i, '').split('/');
+            document.getElementById('bc-path').textContent = parts.join(' / ');
+
+            try {
+                const res = await fetch(path);
+                if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                const text = await res.text();
+                renderMarkdown(text);
+                setStatus('OK');
+            } catch (err) {
+                showError(path, err);
+                setStatus('ERR');
+            }
+        }
+
+        /* 
+            Render MD with LaTeX support, syntax highlighting,
+            and image support.
+        */
+        function renderMarkdown(text) {
+            // Pre-process: protect LaTeX blocks from Markdown parser
+            const blocks = [];
+            let processed = text
+                // Display math $$...$$ and \[...\]
+                .replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => {
+                    blocks.push({ type: 'display', content: m });
+                    return `%%MATH_BLOCK_${blocks.length - 1}%%`;
+                })
+                .replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => {
+                    blocks.push({ type: 'display', content: m });
+                    return `%%MATH_BLOCK_${blocks.length - 1}%%`;
+                })
+                // Inline math $...$ and \(...\)
+                .replace(/\$([^\n$]+?)\$/g, (_, m) => {
+                    blocks.push({ type: 'inline', content: m });
+                    return `%%MATH_BLOCK_${blocks.length - 1}%%`;
+                })
+                .replace(/\\\((.+?)\\\)/g, (_, m) => {
+                    blocks.push({ type: 'inline', content: m });
+                    return `%%MATH_BLOCK_${blocks.length - 1}%%`;
+                });
+
+            // Parse Markdown
+            let html = marked.parse(processed);
+
+            // Restore math blocks
+            html = html.replace(/%%MATH_BLOCK_(\d+)%%/g, (_, i) => {
+                const block = blocks[parseInt(i)];
+                try {
+                    if (block.type === 'display') {
+                        return `<div class="katex-display">${katex.renderToString(block.content, { displayMode: true, throwOnError: false })}</div>`;
+                    } else {
+                        return katex.renderToString(block.content, { displayMode: false, throwOnError: false });
+                    }
+                } catch (e) {
+                    return `<code>${block.content}</code>`;
+                }
+            });
+
+            // Inject code language labels
+            html = html.replace(/<pre><code class="(hljs language-([^"]+))">/g, (match, cls, lang) => {
+                return `<pre style="position:relative"><span class="code-label">${lang.toUpperCase()}</span><code class="${cls}">`;
+            });
+
+            const body = document.getElementById('md-body');
+            body.innerHTML = html;
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+
+            // Scroll to top
+            document.getElementById('main').scrollTop = 0;
+        }
+
+        /*
+            Show error bar.
+        */
+        function showError(path, err) {
+            document.getElementById('loading').style.display = 'none';
+            const el = document.getElementById('error-state');
+            el.style.display = 'block';
+            el.innerHTML = `
+    <h3>// FILE NOT FOUND</h3>
+    <p>Could not load <code>${path}</code></p>
+    <p style="margin-top:0.8rem">${err.message}</p>
+    <p style="margin-top:1.2rem;color:var(--text-muted);font-size:11px">
+      Make sure you're serving this from a local server (e.g. <code>python3 -m http.server</code>)
+      and that the file exists relative to <code>index.html</code>.
+    </p>`;
+        }
+
+        /* 
+            Set status bar.
+        */
+        function setStatus(s) {
+            const map = { LOADING: 'LOADING...', OK: 'READY', ERR: 'ERROR', READY: 'READY' };
+            document.getElementById('status-bar').textContent = map[s] || s;
+        }
+
+        function ordinal(n) {
+            if (n > 3 && n < 21) return n + "th";
+            switch (n % 10) {
+                case 1: return n + "st";
+                case 2: return n + "nd";
+                case 3: return n + "rd";
+                default: return n + "th";
+            }
+        }
+
+        /*
+            Function to convert UNIX timestamp to a nicely
+            formatted string in IST.
+        */
+        function unixTimestampToNiceIST(ts, locale = "en-IN") {
+            // Convert UNIX (seconds -> milliseconds)
+            const date = new Date(ts * 1000);
+
+            // Format parts in IST
+            const options = {
+                timeZone: "Asia/Kolkata",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+            };
+
+            const parts = new Intl.DateTimeFormat(locale, options).formatToParts(date);
+
+            let day, month, year, hour, minute, dayPeriod;
+
+            parts.forEach(p => {
+                if (p.type === "day") day = ordinal(parseInt(p.value));
+                if (p.type === "month") month = p.value;
+                if (p.type === "year") year = p.value;
+                if (p.type === "hour") hour = p.value;
+                if (p.type === "minute") minute = p.value;
+                if (p.type === "dayPeriod") dayPeriod = p.value;
+            });
+
+            return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod} (IST)`;
+        }
+
+        /* 
+            Set the created and modified time in the bottom bar.
+        */
+        function setCreatedModifiedTime(c_time, m_time) {
+            document.getElementById('date-created').textContent = unixTimestampToNiceIST(c_time);
+            document.getElementById('date-modified').textContent = unixTimestampToNiceIST(m_time);
+        }
+
+        function handleRoute() {
+            const route = window.location.hash.slice(1);
+
+            if (route in file_loader_functions) {
+                file_loader_functions[route]();
+                
+                // Expand the folder in which the route is in.
+                const hierarchy = route.split('/').filter(Boolean);
+
+                let currentPath = "";
+
+                for (const folder of hierarchy.slice(0, -1)) { // exclude file
+                    currentPath += "/" + folder;
+
+                    const id = `folder-element${currentPath.replaceAll("/", "-")}`;
+                    const el = document.getElementById(id);
+
+                    if (el) {
+                        el.classList.add('open');
+                    }
+                }
+
+            } else {
+                document.getElementById('content').style.display = 'none';
+                showError(route, "");
+                setStatus('ERR');
+            }
+        }
+
+        /*
+            Executed when blog is loaded.
+        */
+        async function boot() {
+            await loadConfig();
+            await populateSidebar();
+
+            /* 
+                Very important. Add the listener that makes
+                navigation possible.
+            */
+            window.addEventListener("hashchange", handleRoute);
+
+            if (window.location.hash === "")
+                window.location.hash = '/index.md';
+            else
+                handleRoute();
+        }
+
+        boot();
+    </script>
+</body>
+
+</html>
