@@ -46,13 +46,16 @@
         </nav>
 
         <main id="main">
-            <div id="loading">
-                <div class="spinner"></div>
-                <span>Initialising...</span>
-            </div>
-            <div id="error-state"></div>
-            <div id="content" style="display:none">
-                <div class="md-body" id="md-body"></div>
+            <div id="glass"></div>
+            <div class="content">
+                <div id="loading">
+                    <div class="spinner"></div>
+                    <span>Initialising...</span>
+                </div>
+                <div id="error-state"></div>
+                <div id="content" style="display:none">
+                    <div class="md-body" id="md-body"></div>
+                </div>
             </div>
         </main>
 
@@ -66,17 +69,10 @@
                 <span id="date-modified"></span>
             </div>
         </footer>
-
-        <!-- Noise filter for glass texture -->
-        <svg width="0" height="0">
-            <filter id="noise-filter">
-                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
-            </filter>
-        </svg>
     </div>
 
     <script>
-        var IMAGES_ROOT = '/images'; // root for image src in MD files
+        var MEDIA_ROOT = '/media'; // root for media src in MD files
         var BLOGDATA_JSON = null;
         var ROOT_PATH_PREFIX = "";
         /* 
@@ -104,7 +100,7 @@
         renderer.image = (href, title, text) => {
             // Strip leading ./ or / from href, resolve against images root
             const clean = href.replace(/^\.?\//, '');
-            const resolved = clean.startsWith('http') ? href : `${IMAGES_ROOT}/${clean}`;
+            const resolved = clean.startsWith('http') ? href : `${MEDIA_ROOT}/${clean}`;
             const titleAttr = title ? ` title="${title}"` : '';
             return `<img src="${resolved}" alt="${text}"${titleAttr} loading="lazy">`;
         };
@@ -183,7 +179,7 @@
 
             BLOGDATA_JSON = data;
             ROOT_PATH_PREFIX = `./${data.name}`;
-            IMAGES_ROOT = `${ROOT_PATH_PREFIX}${IMAGES_ROOT}`;
+            MEDIA_ROOT = `${ROOT_PATH_PREFIX}${MEDIA_ROOT}`;
 
             root.appendChild(buildTree(data, "", 0));
         }
@@ -425,6 +421,7 @@
             else
                 handleRoute();
             
+            /* For the side bar button */
             document.getElementById('sidebar-button').addEventListener('click', () => {
                 document.getElementById('sidebar').classList.toggle('closed');
             }); 

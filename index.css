@@ -17,7 +17,7 @@
     --font-display: 'Rajdhani', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
     --font-ui: 'Share Tech Mono', monospace;
-    --sidebar-w: 280px;
+    --sidebar-w: 20vw;
     --header-h: 52px;
 }
 
@@ -32,7 +32,7 @@
 html,
 body {
     height: 100%;
-    background: var(--bg-base);
+    background-color: var(--bg-base);
     color: var(--text-primary);
     font-family: var(--font-display);
     font-size: 16px;
@@ -48,8 +48,8 @@ body::before {
     background: repeating-linear-gradient(0deg,
             transparent,
             transparent 2px,
-            rgba(0, 0, 0, 0.06) 2px,
-            rgba(0, 0, 0, 0.06) 4px);
+            rgba(0, 0, 0, 0.05) 2px,
+            rgba(0, 0, 0, 0.05) 4px);
     pointer-events: none;
     z-index: 1000;
 }
@@ -159,6 +159,7 @@ body::before {
     transform: translateX(0);           /* visible state */
     transition: transform 0.3s ease;    /* MUST be here */
     width: var(--sidebar-w);
+    z-index: 1;
 }
 
 body.sidebar-closed {
@@ -297,6 +298,7 @@ body.sidebar-closed {
     overflow: hidden;
     text-overflow: ellipsis;
     text-decoration: none;
+    border-radius: 20px;
 }
 
 .tree-file:hover {
@@ -309,6 +311,7 @@ body.sidebar-closed {
     color: var(--bg-base);
     border-left: 2px solid var(--bg-base);
     margin-left: -2px;
+    
 }
 
 .tree-file .file-icon {
@@ -323,10 +326,37 @@ body.sidebar-closed {
 
 /* ── Main content ── */
 #main {
+    position: relative;
     overflow-y: auto;
     overflow-x: hidden;
-    background: var(--bg-base);
-    position: relative;
+    background:
+        radial-gradient(
+            circle at 50% -20%,
+            rgba(180, 0, 0, 0.8) 0%,
+            rgba(120, 0, 0, 0.4) 20%,
+            rgba(0, 0, 0, 0.0) 50%
+        ),
+        linear-gradient(
+            to bottom,
+            #000 0%,
+            #000 75%,
+            #000 100%
+        );
+}
+
+#glass {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border-radius: inherit;
+
+    z-index: 0; /* BELOW content */
+    min-height: 100%;
+    pointer-events: none;
 }
 
 #main::-webkit-scrollbar {
@@ -421,6 +451,10 @@ body.sidebar-closed {
     font-size: 12px;
 }
 
+.content {
+    position: relative;
+    z-index: 1;
+}
 /* ── Markdown content styles ── */
 .md-body h1,
 .md-body h2,
@@ -610,6 +644,11 @@ body.sidebar-closed {
     overflow-x: auto;
     overflow-y: hidden;
     padding: 0.5rem 0;
+}
+
+.md-body::selection {
+    background: var(--accent-active);
+    color: var(--bg-base);
 }
 
 /* Corner decoration on content area */

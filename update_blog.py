@@ -2,7 +2,10 @@ import os
 import json
 
 POSTS_ROOT = './root/'
-IGNORE_DIRS = ['./root/images']
+
+# Don't add media to the index. We will serve media files directly from the filesystem 
+# instead of through the index, so we don't need them in the manifest.
+IGNORE_DIRS = ['./root/media']
 
 def createManifest(name="root", manifest_root=POSTS_ROOT):
     manifest = {}
