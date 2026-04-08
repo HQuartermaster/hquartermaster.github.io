@@ -451,11 +451,44 @@ body.sidebar-closed {
     font-size: 12px;
 }
 
-.content {
+.content-area {
     position: relative;
     z-index: 1;
 }
+
+#tab-header {
+    width: 25%;
+
+    white-space: nowrap;      /* Prevent line wrapping */
+    overflow: hidden;         /* Hide overflow */
+    text-overflow: ellipsis;  /* Show ... */
+
+    background: var(--accent);
+    padding: 0.4rem 1.2rem;
+    color: var(--bg-base);
+    font-weight: 800;
+
+    clip-path: polygon(
+        10% 0,
+        90% 0,
+        100% 100%,
+        0% 100%
+    );
+
+    border: 1px solid var(--accent);
+    box-shadow:
+        0 0 5px var(--accent),
+        0 0 15px var(--accent-dim);
+}
+
 /* ── Markdown content styles ── */
+.md-body {
+    padding: 5%;
+    border: 1px solid var(--accent);
+    box-shadow:
+        0 0 5px var(--accent),
+        0 0 15px var(--accent-dim);
+}
 .md-body h1,
 .md-body h2,
 .md-body h3,

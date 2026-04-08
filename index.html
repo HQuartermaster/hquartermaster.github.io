@@ -47,13 +47,14 @@
 
         <main id="main">
             <div id="glass"></div>
-            <div class="content">
+            <div class="content-area">
                 <div id="loading">
                     <div class="spinner"></div>
                     <span>Initialising...</span>
                 </div>
                 <div id="error-state"></div>
                 <div id="content" style="display:none">
+                    <div id="tab-header">Header</div>
                     <div class="md-body" id="md-body"></div>
                 </div>
             </div>
@@ -119,7 +120,7 @@
                 const el = document.createElement('div');
                 el.className = 'tree-file';
                 el.dataset.path = route_path;
-                const label = fname.replace(/\.md$/i, '');
+                const label = fname
                 el.innerHTML = `<i class="fa-solid fa-file"></i>${label}`;
 
                 /* 
@@ -128,6 +129,7 @@
                 */
                 file_loader_functions[route_path] = () => {
                     setCreatedModifiedTime(fileobj.timestamp_created, fileobj.timestamp_modified);
+                    document.getElementById('tab-header').textContent = label;
                     const full_path = `${ROOT_PATH_PREFIX}/${route_path}`;
                     loadFile(full_path, el);
                 }
