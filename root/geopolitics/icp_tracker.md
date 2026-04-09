@@ -48,7 +48,7 @@ author_link: https://Discontinued.com/HQuarterMa43504
 | JH7      | 3.0/ATTACK      |200        | Discontinued            |
 | J36      | 6.0/SUPERHEAVY  |3          | ?                       |
 | J50      | 6.0/SUPERHEAVY  |1          | ?                       |
-| Total    |                 | 2212      | 100+                    |
+| Total    |                 | 2212      | 1000+                   |
 
 ### AWACS
 
@@ -58,7 +58,7 @@ author_link: https://Discontinued.com/HQuarterMa43504
 | KJ2000   | 4         |?                        |
 | KJ200    | 11        |Discontinued             |
 | KJ500    | 40        |Discontinued             |
-| Total    | 55        |Discontinued             |
+| Total    | 55        |?                        |
 
 ### PAF
 
