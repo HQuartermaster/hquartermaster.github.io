@@ -38,10 +38,10 @@ author_link: https://Discontinued.com/HQuarterMa43504
 
 | Aircraft | Generation/Type | N (built) | N (planned)             |
 | ---      |    ---          |---        | ---                     |
-| J10      | 4.5/MEDIUM      |608        | Discontinued            |
+| J10      | 4.5/MEDIUM      |608        | Export only             |
 | J20      | 5.0/HEAVY       |330        | 500+                    |
 | J11      | 4.0/HEAVY       |445        | Discontinued            |
-| J16      | 4.5/HEAVY       |450        | Discontinued            |
+| J16      | 4.5/HEAVY       |450        | ?                       |
 | J35      | 5.0/MEDIUM      |054        | 500+                    |
 | S30      | 4.0/HEAVY       |097        | Discontinued            |
 | S35      | 4.5/HEAVY       |024        | Discontinued            |
