@@ -16,7 +16,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
-
+    <!-- YAML parser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 
@@ -61,6 +62,10 @@
         </main>
 
         <footer id="footer">
+            <div class="breadcrumb breadcrumb-nooverflow" id="author-info">
+                <span><i class="fa fa-user" aria-hidden="true"></i>&nbsp;</span>
+                <a href="#" target="_blank" id="author-link" rel="noopener noreferrer"><span id="author-name"></span></a>
+            </div>
             <div class="breadcrumb">
                 <span><i class="fa fa-plus"></i>&nbsp;</span>
                 <span id="date-created"></span>
@@ -215,6 +220,79 @@
             }
         }
 
+        /* Extract header YAML */
+        function extractYAML(md) {
+            const match = md.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*/);
+
+            if (!match) {
+                return { metadata: {}, content: md };
+            }
+
+            const yamlText = match[1];
+            const content = md.slice(match[0].length);
+            const yamldata = jsyaml.load(yamlText);
+            return { yamldata, content };
+        }
+
+        /* Resolve citations */
+        function resolveCitations(container, yamldata) {
+            const nodes = container.querySelectorAll(".cite");
+
+            nodes.forEach(node => {
+                const key = node.dataset.key;
+                const entry = yamldata?.citations?.[key];
+
+                if (!entry) {
+                    // Citation key not found in YAML
+                    node.innerHTML = `<sup class="cite-missing">?</sup>`;
+                    return;
+                }
+
+                const author = entry.author || "Unknown";
+                const title = entry.title || "Untitled";
+                const doi = entry.doi || null;
+                const year = entry.year || null;
+                const tooltipHTML = `
+                    <div class="cite-tooltip">
+                        <div><b>${author}</b>${year ? `&nbsp;(${year})` : ""}</div>
+                        <div><i>${title}</i></div>
+                    </div>
+                `;
+
+                node.innerHTML = `
+                    <span class="cite-wrapper">
+                        <sup class="cite-valid">
+                            <i class="fa-solid fa-book-open"></i>
+                            ${tooltipHTML}
+                        </sup>
+                    </span>
+                `;
+
+                // Optional: clickable DOI
+                if (doi) {
+                    node.querySelector("sup").style.cursor = "pointer";
+                    node.querySelector("sup").onclick = () => {
+                        window.open(`https://doi.org/${doi}`, "_blank");
+                    };
+                }
+            });
+        }
+
+        function setAuthor(name, link) {
+            const authorNameEl = document.getElementById('author-name');
+            const authorLinkEl = document.getElementById('author-link');
+
+            authorNameEl.textContent = name || "anonymous";
+            if (link) {
+                authorLinkEl.href = link;
+                authorLinkEl.style.pointerEvents = 'auto';
+                authorLinkEl.style.opacity = '1';
+            } else {
+                authorLinkEl.href = '#';
+                authorLinkEl.style.pointerEvents = 'none';
+                authorLinkEl.style.opacity = '0.6';
+            }
+        }
         /* 
             Render MD with LaTeX support, syntax highlighting,
             and image support.
@@ -241,10 +319,50 @@
                     blocks.push({ type: 'inline', content: m });
                     return `%%MATH_BLOCK_${blocks.length - 1}%%`;
                 });
+            
+            /* Extract YAML data */
+            const { yamldata, content } = extractYAML(processed);
+
+            /* Remove YAML data from marked content */
+            processed = content;
+            
+            /* Set page title and author name if available */
+            if (yamldata?.title) {
+                window.document.title = yamldata.title;
+            } else {
+                window.document.title = "Untitled | Nexus";
+            }
+
+            setAuthor(yamldata?.author, yamldata?.author_link);
+            /* Add citation support to marked */
+            const citationExtension = {
+                name: "citation",
+                level: "inline",
+
+                start(src) {
+                    return src.indexOf("[@");
+                },
+
+                tokenizer(src) {
+                    const match = /^\[@([a-zA-Z0-9_-]+)\]/.exec(src);
+                    if (match) {
+                        return {
+                            type: "citation",
+                            raw: match[0],
+                            key: match[1]
+                        };
+                    }
+                },
+
+                renderer(token) {
+                    return `<span class="cite" data-key="${token.key}"></span>`;
+                }
+            };
+            marked.use({ extensions: [citationExtension] });
 
             // Parse Markdown
             let html = marked.parse(processed);
-
+            
             // Restore math blocks
             html = html.replace(/%%MATH_BLOCK_(\d+)%%/g, (_, i) => {
                 const block = blocks[parseInt(i)];
@@ -267,6 +385,8 @@
             const body = document.getElementById('md-body');
             body.innerHTML = html;
 
+            // After rendering, resolve citations
+            resolveCitations(body, yamldata);
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').style.display = 'block';
 

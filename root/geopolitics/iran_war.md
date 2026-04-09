@@ -1,3 +1,10 @@
+---
+title: On the Iran War
+author: quartermaster
+author_link: "https://x.com/HQuarterMa43504"
+---
+
+
 # On the Iran War
 
 If there's one word to describe the Iran War, it is *tragic*.
