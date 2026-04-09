@@ -12,7 +12,7 @@
     --accent-dim: #1f7a66;
     --accent-glow: rgba(74, 243, 200, 0.12);
     --text-primary: #ffffff;
-    --text-secondary: #8b90a0;
+    --text-secondary: #b6b8be;
     --text-muted: #555a6a;
     --font-display: 'Rajdhani', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
@@ -345,22 +345,13 @@ body.sidebar-closed {
     position: relative;
     overflow-y: auto;
     overflow-x: hidden;
-}
-
-#glass {
-    position: fixed;
-    inset: 0;
-
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-
-    border-radius: inherit;
-
-    /* BELOW content */
-    z-index: 0; 
-    min-height: 100%;
-    pointer-events: none;
+    background:
+        linear-gradient(
+            to bottom,
+            #222 0%,
+            #000 75%,
+            #000 100%
+        );
 }
 
 #main::-webkit-scrollbar {

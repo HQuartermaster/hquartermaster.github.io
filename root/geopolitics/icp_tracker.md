@@ -78,8 +78,8 @@ author_link: https://Discontinued.com/HQuarterMa43504
 
 #### AWACS
 
-| Aircraft | N (built) | N (planned)  |
-| ---      | ---       | ---          |
-| SAAB Erieye | 9      | 0            |
-| Total       | 9      | 0            |
+| Aircraft    | N (built) | N (planned)  |
+| ---         | ---       | ---          |
+| SAAB Erieye | 9         | 0            |
+| Total       | 9         | 0            |
 
