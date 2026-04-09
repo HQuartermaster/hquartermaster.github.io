@@ -345,19 +345,6 @@ body.sidebar-closed {
     position: relative;
     overflow-y: auto;
     overflow-x: hidden;
-    background:
-        radial-gradient(
-            circle at 50% -20%,
-            rgba(180, 0, 0, 0.8) 0%,
-            rgba(120, 0, 0, 0.4) 20%,
-            rgba(0, 0, 0, 0.0) 50%
-        ),
-        linear-gradient(
-            to bottom,
-            #000 0%,
-            #000 75%,
-            #000 100%
-        );
 }
 
 #glass {
