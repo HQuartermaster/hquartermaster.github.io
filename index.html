@@ -28,7 +28,7 @@
         <header id="header">
             <div class="logo" id="blog-title">Sample Title</div>
             <div class="breadcrumb" id="breadcrumb">
-                <span class="sep">/#/</span>
+                <span class="sep">/ #</span>
                 <span class="current" id="bc-path">index</span>
             </div>
             <div class="status" id="status-bar">READY</div>
@@ -54,7 +54,7 @@
                 </div>
                 <div id="error-state"></div>
                 <div id="content" style="display:none">
-                    <div id="tab-header">Header</div>
+                    <div class="tab-header"><span class="fa fa-file"></span>&nbsp;<span id="main-tab">Header</span></div>
                     <div class="md-body" id="md-body"></div>
                 </div>
             </div>
@@ -129,7 +129,7 @@
                 */
                 file_loader_functions[route_path] = () => {
                     setCreatedModifiedTime(fileobj.timestamp_created, fileobj.timestamp_modified);
-                    document.getElementById('tab-header').textContent = label;
+                    document.getElementById('main-tab').textContent = label;
                     const full_path = `${ROOT_PATH_PREFIX}/${route_path}`;
                     loadFile(full_path, el);
                 }
