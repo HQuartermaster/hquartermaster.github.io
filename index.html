@@ -240,6 +240,7 @@
                 const author = entry.author || "Unknown";
                 const title = entry.title || "Untitled";
                 const doi = entry.doi || null;
+                const link = entry.link || null;
                 const year = entry.year || null;
                 const tooltipHTML = `
                     <div class="cite-tooltip">
@@ -262,6 +263,11 @@
                     node.querySelector("sup").style.cursor = "pointer";
                     node.querySelector("sup").onclick = () => {
                         window.open(`https://doi.org/${doi}`, "_blank");
+                    };
+                } else if (link) {
+                    node.querySelector("sup").style.cursor = "pointer";
+                    node.querySelector("sup").onclick = () => {
+                        window.open(link, "_blank");
                     };
                 }
             });
