@@ -11,43 +11,43 @@ author_link: https://Discontinued.com/HQuarterMa43504
 
 #### Combat Aircraft (3-letter codes)
 
-| Code | Aircraft / System Name                                   |
-|------|----------------------------------------------------------|
-| LCA  | HAL Light Combat Aircraft (Tejas Mk1/Mk1A)               |
-| MWF  | HAL Medium Weight Aircraft (Tejas Mk2)                   |
-| MKI  | HAL/Su-30 MKI                                            |
-| M03  | Dassault Mirage III                                      |
-| M05  | Dassault Mirage V                                        |
-| RFL  | Dassault Rafale DH/EH                                    |
-| M2K  | Dassault Mirage 2000                                     |
-| M29  | MiG-29 B/UPG/UB                                          |
-| JGR  | HAL/SEPECAT Jaguar                                       |
-| ACA  | Advanced Medium Combat Aircraft                          |
-| FCS  | Future Combat Air System                                 |
-| J10  | Chengdu J-10 A/B/C                                       |
-| J11  | Shenyang J-11                                            |
-| J16  | Shenyang J-16                                            |
-| J20  | Chengdu J-20 A/S                                         |
-| J35  | Shenyang J-35                                            |
-| J36  | Chengdu J-36                                             |
-| J50  | Shenyang J-50                                            |
-| F16  | General Dynamics F-16 Fighting Falcon                    |
-| J17  | CAC/PAC JF-17 Thunder                                    |
-| F7G  | Chengdu F-7PG                                            |
-| TFX  | TAI TF-X "KAAN"                                          |
+| Code | Aircraft / System Name                                   | Origin    |
+|------|----------------------------------------------------------| ---       |
+| LCA  | HAL Light Combat Aircraft (Tejas Mk1/Mk1A)               | :flag[in] |
+| MWF  | HAL Medium Weight Aircraft (Tejas Mk2)                   | :flag[in] |
+| MKI  | HAL/Su-30 MKI                                            | :flag[in] :flag[ru] |
+| M03  | Dassault Mirage III                                      | :flag[fr] |
+| M05  | Dassault Mirage V                                        | :flag[fr] |
+| RFL  | Dassault Rafale DH/EH                                    | :flag[fr] |
+| M2K  | Dassault Mirage 2000                                     | :flag[fr] |
+| M29  | MiG-29 B/UPG/UB                                          | :flag[ru] |
+| JGR  | HAL/SEPECAT Jaguar                                       | :flag[fr] :flag[gb] :flag[in] |
+| ACA  | Advanced Medium Combat Aircraft                          | :flag[in] |
+| FCS  | Future Combat Air System                                 | :flag[eu] |
+| J10  | Chengdu J-10 A/B/C                                       | :flag[cn] |
+| J11  | Shenyang J-11                                            | :flag[ru] :flag[cn] |
+| J16  | Shenyang J-16                                            | :flag[cn] |
+| J20  | Chengdu J-20 A/S                                         | :flag[cn] |
+| J35  | Shenyang J-35                                            | :flag[cn] |
+| J36  | Chengdu J-36                                             | :flag[cn] |
+| J50  | Shenyang J-50                                            | :flag[cn] |
+| F16  | General Dynamics F-16 Fighting Falcon                    | :flag[us] |
+| J17  | CAC/PAC JF-17 Thunder                                    | :flag[cn] :flag[pk] |
+| F7G  | Chengdu F-7PG                                            | :flag[cn] |
+| TFX  | TAI TF-X "KAAN"                                          | :flag[tr] |
 
 #### AWACS (4-letter codes)
 
-| Code | Aircraft / System Name                                   |
-|------|----------------------------------------------------------|
-| BA50 | Beriev A-50EI                                            |
-| NRA1 | DRDO AEW&C "Netra" Mk1/Mk1A                              |
-| NRA2 | DRDO AWACS "Netra" Mk2                                   |
-| KJ3K | Xi'an KJ-3000                                            |
-| KJ2K | Shaanxi KJ-2000                                          |
-| KJ2H | Shaanxi KJ-200                                           |
-| KJ5H | Shaanxi KJ-500                                           |
-| EEYE | SAAB Erieye                                              |
+| Code | Aircraft / System Name                                   | Origin    |
+|------|----------------------------------------------------------| ---       |
+| BA50 | Beriev A-50EI                                            | :flag[ru] |
+| NRA1 | DRDO AEW&C "Netra" Mk1/Mk1A                              | :flag[in] |
+| NRA2 | DRDO AWACS "Netra" Mk2                                   | :flag[in] |
+| KJ3K | Xi'an KJ-3000                                            | :flag[cn] |
+| KJ2K | Shaanxi KJ-2000                                          | :flag[cn] |
+| KJ2H | Shaanxi KJ-200                                           | :flag[cn] |
+| KJ5H | Shaanxi KJ-500                                           | :flag[cn] |
+| EEYE | SAAB Erieye                                              | :flag[se] |
 </details>
 
 ### :flag[in] IAF
