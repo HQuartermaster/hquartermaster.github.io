@@ -101,17 +101,6 @@
             gfm: true,
         });
 
-        // Custom renderer to fix image paths
-        const renderer = new marked.Renderer();
-        renderer.image = (href, title, text) => {
-            // Strip leading ./ or / from href, resolve against images root
-            const clean = href.replace(/^\.?\//, '');
-            const resolved = clean.startsWith('http') ? href : `${MEDIA_ROOT}/${clean}`;
-            const titleAttr = title ? ` title="${title}"` : '';
-            return `<img src="${resolved}" alt="${text}"${titleAttr} loading="lazy">`;
-        };
-        marked.use({ renderer });
-
         /* 
             Build the sidebar tree.
         */
@@ -334,6 +323,18 @@
             }
 
             setAuthor(yamldata?.author, yamldata?.author_link);
+
+            // Custom renderer to fix image paths
+            const renderer = new marked.Renderer();
+            renderer.image = (href, title, text) => {
+                // Strip leading ./ or / from href, resolve against images root
+                const clean = href.replace(/^\.?\//, '');
+                const resolved = clean.startsWith('http') ? href : `${MEDIA_ROOT}/${clean}`;
+                const titleAttr = title ? ` title="${title}"` : '';
+                return `<img src="${resolved}" alt="${text}"${titleAttr} loading="lazy">`;
+            };
+            marked.use({ renderer });
+            
             /* Add citation support to marked */
             const citationExtension = {
                 name: "citation",
@@ -358,7 +359,35 @@
                     return `<span class="cite" data-key="${token.key}"></span>`;
                 }
             };
-            marked.use({ extensions: [citationExtension] });
+
+            const flagExtension = {
+                    name: 'flag',
+                    level: 'inline',
+
+                    start(src) {
+                        return src.match(/:flag\[/)?.index;
+                    },
+
+                    tokenizer(src) {
+                        const rule = /^:flag\[([a-zA-Z0-9_-]+)\]/;
+                        const match = rule.exec(src);
+                        if (match) {
+                        return {
+                            type: 'flag',
+                            raw: match[0],
+                            code: match[1].toLowerCase()
+                        };
+                        }
+                    },
+
+                    renderer(token) {
+                        return `<img src="${MEDIA_ROOT}/flags/${token.code}.png"
+                                    alt="${token.code.toUpperCase()} Flag"
+                                    width="24"
+                                    style="border: none;display:inline; vertical-align:middle;"/>`;
+                    }
+                };
+            marked.use({ extensions: [citationExtension, flagExtension] });
 
             // Parse Markdown
             let html = marked.parse(processed);
