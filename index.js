@@ -1,28 +1,18 @@
-var MEDIA_ROOT = '/media'; // root for media src in MD files
-var BLOGDATA_JSON = null;
+// root directory for the blog
 var ROOT_PATH_PREFIX = "";
-/* 
-    State
-*/
+// root for media src in MD files
+var MEDIA_ROOT = '/media';
+// Contains data.json object
+var BLOGDATA_JSON = null;
+// Current file
 let current_file = null;
+// A dictionary that maps paths to lambdas that load
+// the file and set the relevant elements.
 let file_loader_functions = {};
-/* 
-    Marked for rendering markdown.
-*/
-marked.setOptions({
-    highlight: (code, lang) => {
-        if (lang && hljs.getLanguage(lang)) {
-            return hljs.highlight(code, { language: lang }).value;
-        }
-        return hljs.highlightAuto(code).value;
-    },
-    langPrefix: 'hljs language-',
-    breaks: false,
-    gfm: true,
-});
 
 /* 
-    Build the sidebar tree.
+    Build the sidebar tree, recursively,
+    directory by directory.
 */
 function buildTree(node, pathPrefix, depth) {
     const frag = document.createDocumentFragment();
@@ -79,6 +69,9 @@ function buildTree(node, pathPrefix, depth) {
     return frag;
 }
 
+/* 
+    Loads the configuration from config.json.
+*/
 async function loadConfig() {
     const response = await fetch('./config.json');
     const data = await response.json();
@@ -87,6 +80,11 @@ async function loadConfig() {
     document.title = data.web_title;
 }
 
+/* 
+    Loads the file tree from data.json.
+    Sets the root directory, and the media root.
+    Builds the sidebar.
+*/
 async function loadDataAndSidebar() {
     const root = document.getElementById('tree-root');
 
@@ -100,7 +98,12 @@ async function loadDataAndSidebar() {
     root.appendChild(buildTree(data, "", 0));
 }
 /* 
-    Load a markdown file given path.
+    Load a file given path.
+
+    Updates the active status in the sidebar
+    and the breadcrumb.
+
+    Then loads a file.
 */
 async function loadFile(path, triggerEl) {
     setStatus('LOADING');
@@ -114,9 +117,10 @@ async function loadFile(path, triggerEl) {
     current_file = path;
 
     // Update breadcrumb
-    const parts = path.replace(ROOT_PATH_PREFIX + '/', '').replace(/\.md$/i, '').split('/');
+    const parts = path.replace(ROOT_PATH_PREFIX + '/', '').split('/');
     document.getElementById('bc-path').textContent = parts.join(' / ');
 
+    // Now load the file
     try {
         const res = await fetch(path);
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -128,8 +132,10 @@ async function loadFile(path, triggerEl) {
         setStatus('ERR');
     }
 }
-
-/* Extract header YAML */
+/* 
+    Extract YAML header
+    Returns the yamldata and content (md without the yaml)
+*/
 function extractYAML(md) {
     const match = md.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*/);
 
@@ -142,8 +148,13 @@ function extractYAML(md) {
     const yamldata = jsyaml.load(yamlText);
     return { yamldata, content };
 }
+/* 
+    Resolve citations. Called after the mark down renderer
+    has add .cite class for every [@citation] element.
 
-/* Resolve citations */
+    We then browse through the YAML citations and add
+    in the links and the data.
+*/
 function resolveCitations(container, yamldata) {
     const nodes = container.querySelectorAll(".cite");
 
@@ -192,25 +203,9 @@ function resolveCitations(container, yamldata) {
         }
     });
 }
-
-function setAuthor(name, link) {
-    const authorNameEl = document.getElementById('author-name');
-    const authorLinkEl = document.getElementById('author-link');
-
-    authorNameEl.textContent = name || "anonymous";
-    if (link) {
-        authorLinkEl.href = link;
-        authorLinkEl.style.pointerEvents = 'auto';
-        authorLinkEl.style.opacity = '1';
-    } else {
-        authorLinkEl.href = '#';
-        authorLinkEl.style.pointerEvents = 'none';
-        authorLinkEl.style.opacity = '0.6';
-    }
-}
 /* 
     Render MD with LaTeX support, syntax highlighting,
-    and image support.
+    image support and citations.
 */
 function renderMarkdown(text) {
     // Pre-process: protect LaTeX blocks from Markdown parser
@@ -344,16 +339,13 @@ function renderMarkdown(text) {
         }
     });
 
-    // Inject code language labels
-    html = html.replace(/<pre><code class="(hljs language-([^"]+))">/g, (match, cls, lang) => {
-        return `<pre style="position:relative"><span class="code-label">${lang.toUpperCase()}</span><code class="${cls}">`;
-    });
-
     const body = document.getElementById('md-body');
     body.innerHTML = html;
 
     // After rendering, resolve citations
     resolveCitations(body, yamldata);
+
+
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
 
@@ -369,7 +361,7 @@ function showError(path, err) {
     const el = document.getElementById('error-state');
     el.style.display = 'block';
     el.innerHTML = `
-    <h3>// FILE NOT FOUND</h3>
+    <h3>// ERROR</h3>
     <p>Could not load <code>${path}</code></p>
     <p style="margin-top:0.8rem">${err.message}</p>
     <p style="margin-top:1.2rem;color:var(--text-muted);font-size:11px">
@@ -377,15 +369,6 @@ function showError(path, err) {
       and that the file exists relative to <code>index.html</code>.
     </p>`;
 }
-
-/* 
-    Set status bar.
-*/
-function setStatus(s) {
-    const map = { LOADING: 'LOADING...', OK: 'READY', ERR: 'ERROR', READY: 'READY' };
-    document.getElementById('status-bar').textContent = map[s] || s;
-}
-
 function ordinal(n) {
     if (n > 3 && n < 21) return n + "th";
     switch (n % 10) {
@@ -431,6 +414,10 @@ function unixTimestampToNice(ts, locale = "en-IN") {
     return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod.toUpperCase()}`;
 }
 
+/*
+    Function to convert UNIX timestamp to a short
+        formatted string for mobile view.
+*/
 function unixTimeStampToShort(ts, locale = "en-IN") {
     const date = new Date(ts * 1000);
     const options = {
@@ -455,6 +442,31 @@ function unixTimeStampToShort(ts, locale = "en-IN") {
     return `${day}.${month}.${year} ${hour}:${minute}`;
 }
 /* 
+    Set author name and link in the bottom bar.
+*/
+function setAuthor(name, link) {
+    const authorNameEl = document.getElementById('author-name');
+    const authorLinkEl = document.getElementById('author-link');
+
+    authorNameEl.textContent = name || "anonymous";
+    if (link) {
+        authorLinkEl.href = link;
+        authorLinkEl.style.pointerEvents = 'auto';
+        authorLinkEl.style.opacity = '1';
+    } else {
+        authorLinkEl.href = '#';
+        authorLinkEl.style.pointerEvents = 'none';
+        authorLinkEl.style.opacity = '0.6';
+    }
+}
+/* 
+    Set status bar.
+*/
+function setStatus(s) {
+    const map = { LOADING: 'LOADING...', OK: 'READY', ERR: 'ERROR', READY: 'READY' };
+    document.getElementById('status-bar').textContent = map[s] || s;
+}
+/* 
     Set the created and modified time in the bottom bar.
 */
 function setCreatedModifiedTime(c_time, m_time) {
@@ -463,10 +475,12 @@ function setCreatedModifiedTime(c_time, m_time) {
     document.getElementById('date-modified').textContent = timeStampFunc(m_time);
 }
 
+/* 
+    This is the function that gets called when window.location.hash changes.
+    The core of our navigation system.
+*/
 function handleRoute() {
     const route = window.location.hash.slice(1);
-    console.log(file_loader_functions);
-    console.log(route);
     if (route in file_loader_functions) {
         file_loader_functions[route]();
 
@@ -492,14 +506,21 @@ function handleRoute() {
         setStatus('ERR');
     }
 }
-
 /*
     Executed when blog is loaded.
 */
-async function boot() {
+async function onNexusLoad() {
     await loadConfig();
     await loadDataAndSidebar();
 
+    globalThis.marked.use(markedHighlight.markedHighlight({
+        emptyLangClass: 'hljs',
+        langPrefix: 'hljs language-',
+        highlight(code, lang, info) {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language }).value;
+        }
+    }));
     /* 
         Very important. Add the listener that makes
         navigation possible.

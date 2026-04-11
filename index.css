@@ -684,12 +684,13 @@ body.sidebar-closed {
 
 /* KaTeX inline */
 .md-body .katex {
-    font-size: 1.05em;
+    font-size: 1.1em;
 }
 
 .md-body .katex-display {
     overflow-x: auto;
     overflow-y: hidden;
+    font-size: 1.2em;
     padding: 0.5rem 0;
 }
 

@@ -166,12 +166,12 @@ $$
 
 ### Align Environment
 
-[
+$$
 \begin{aligned}
-a &= b + c \
+a &= b + c \\
 d &= e - f
 \end{aligned}
-]
+$$
 
 ---
 
@@ -179,7 +179,7 @@ d &= e - f
 
 > Example:
 >
-> ```js
+> ```javascript
 > console.log("Inside blockquote");
 > ```
 
