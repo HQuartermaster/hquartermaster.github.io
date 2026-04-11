@@ -501,7 +501,7 @@ body.sidebar-closed {
 }
 
 .md-body h1 {
-    font-size: 2.4rem;
+    font-size: 2.6rem;
     color: var(--accent);
     letter-spacing: 0.02em;
     padding-bottom: 0.6rem;
@@ -510,19 +510,19 @@ body.sidebar-closed {
 }
 
 .md-body h2 {
-    font-size: 1.6rem;
+    font-size: 2.2rem;
     padding-bottom: 0.3rem;
     border-bottom: 1px solid var(--border);
     color: var(--text-primary);
 }
 
 .md-body h3 {
-    font-size: 1.25rem;
+    font-size: 1.8rem;
     color: var(--text-secondary);
 }
 
 .md-body h4 {
-    font-size: 1.05rem;
+    font-size: 1.6rem;
     color: var(--text-muted);
 }
 
@@ -530,7 +530,7 @@ body.sidebar-closed {
     margin: 0 0 1.2rem;
     color: var(--text-primary);
     font-family: var(--font-display);
-    font-size: 16px;
+    font-size: 1.2rem;
     font-weight: 400;
     line-height: 1.85;
 }
@@ -551,6 +551,7 @@ body.sidebar-closed {
     margin: 0 0 1.2rem 1.5rem;
     color: var(--text-primary);
     font-weight: 400;
+    font-size: 1.2rem;
 }
 
 .md-body li {
@@ -596,7 +597,7 @@ body.sidebar-closed {
     padding: 0;
     border: none;
     border-radius: 0;
-    font-size: 13px;
+    font-size: 1.1rem;
     display: block;
 }
 
@@ -612,7 +613,7 @@ body.sidebar-closed {
     top: 0;
     right: 0;
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 1.1rem;
     color: var(--text-muted);
     background: var(--bg-raised);
     padding: 3px 10px;
@@ -621,12 +622,27 @@ body.sidebar-closed {
     letter-spacing: 0.05em;
 }
 
+.md-body .table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.md-body .table-container table {
+  border-collapse: collapse;
+  min-width: max-content;
+}
+
+.md-body .table-container th,
+.md-body .table-container td {
+  white-space: nowrap;
+}
+
 .md-body table {
     width: 100%;
     border-collapse: collapse;
     margin: 1.5rem 0;
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 1.2rem;
 }
 
 .md-body th {
@@ -637,7 +653,7 @@ body.sidebar-closed {
     padding: 0.6rem 1rem;
     border: 1px solid var(--border);
     font-family: var(--font-ui);
-    font-size: 12px;
+    font-size: 1.1rem;
     letter-spacing: 0.05em;
     text-transform: uppercase;
 }
@@ -689,6 +705,7 @@ body.sidebar-closed {
 .cite-wrapper {
     position: relative;
     display: inline-block;
+    white-space: nowrap;
 }
 
 .cite-valid {

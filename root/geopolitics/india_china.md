@@ -184,7 +184,7 @@ But Chinese strategic restraint has a clock. The newer generations of Chinese ar
 
 I can only say this: deterrence is the only way to stop any misadventures in Asia. True deterrance. Not running away like cowards to seek shelter under the Americans. The Filipinos, Japanese, Koreans, maybe even Taiwanese could do that. We cannot. A tiger, even if wounded, shitting itself and bleeding, cannot seek refuge in a lion's den. Moreover, a lion is not amicable to tiger, and the Americans have no interest in the defence of a "brown" "pagan" nation like India. 
 
-It is time we abandon critical theory, decoloniality, and other luddite ideologies, and embrace industrialism. Improvements in military technology and industry are the only thing that is going to stop a J-36[@j36] flying over your house while a YJ-10[@cj10] zeroes in on your child's school. 
+It is time we abandon the pursuit of critical theory, decoloniality, and other luddite ideologies, and embrace industrialism. Improvements in military technology and industry are the only thing that is going to stop a J-36[@j36] flying over your house while a CJ-10[@cj10] zeroes in on your child's school. 
 
 EOF.
 
