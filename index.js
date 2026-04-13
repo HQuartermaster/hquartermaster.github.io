@@ -203,6 +203,18 @@ function resolveCitations(container, yamldata) {
         }
     });
 }
+
+function activateCopyButtons(container) {
+    container.querySelectorAll('.copy-code-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const code = btn.closest('.code-block').querySelector('pre').innerText;
+            navigator.clipboard.writeText(code);
+
+            btn.innerHTML = `<span class="fa fa-check"></span>`;
+            setTimeout(() => btn.innerHTML = `<span class="fa fa-copy"></span>`, 2000);
+        });
+    });
+}
 /* 
     Render MD with LaTeX support, syntax highlighting,
     image support and citations.
@@ -265,6 +277,15 @@ function renderMarkdown(text) {
                     </div>
                 `;
     };
+
+    renderer.code = function (code, infostring, escaped) {
+        return `<div class="code-block">
+                    <div class="code-header">
+                        <button class="copy-code-btn"><span class="fa fa-copy"></span></button>
+                    </div>
+                    <pre><code class="hljs language-${infostring}">${code}</code></pre>
+                </div>`;
+    }
 
     marked.use({ renderer });
 
@@ -344,7 +365,8 @@ function renderMarkdown(text) {
 
     // After rendering, resolve citations
     resolveCitations(body, yamldata);
-
+    // Activate the copy code buttons
+    activateCopyButtons(body);
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';

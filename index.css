@@ -573,6 +573,28 @@ body.sidebar-closed {
     color: inherit;
 }
 
+.md-body .code-block {
+    overflow: hidden;
+}
+
+.md-body .code-header {
+    display: flex;
+    background-color: var(--border);
+    justify-content: flex-end;
+    border-radius: 5px 5px 0px 0px;
+    margin-bottom: 0px;
+    padding: 16px 16px;
+}
+
+.md-body .code-header button {
+    font-family: var(--font-display);
+    font-size: 16px;
+    background-color: transparent;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+}
+
 .md-body code {
     font-family: var(--font-mono);
     font-size: 13px;
@@ -585,8 +607,10 @@ body.sidebar-closed {
 
 .md-body pre {
     margin: 1.5rem 0;
-    border-radius: 6px;
+    margin-top: 0;
+    border-radius: 0px 0px 6px 6px;
     border: 1px solid var(--border);
+    border-top: none;
     overflow: hidden;
     position: relative;
 }
