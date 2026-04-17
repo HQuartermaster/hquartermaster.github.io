@@ -57,7 +57,7 @@ author_link: https://Discontinued.com/HQuarterMa43504
 | Aircraft | Generation/Type | N (built) | N (planned)             |
 | ---      |    ---          |---        | ---                     |
 | LCA      | 4.5/LIGHT       |048        | 162                     |
-| MKI      | 4.0/HEAVY       |259        | 012                     |
+| MKI      | 4.0/HEAVY       |257        | 012                     |
 | RFL      | 4.5/MEDIUM      |035        | 114                     |
 | M2K      | 4.0/MEDIUM      |036        | Discontinued            |
 | M29      | 4.0/MEDIUM      |069        | Discontinued            |
