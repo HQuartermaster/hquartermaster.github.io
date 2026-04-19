@@ -25,8 +25,16 @@ function buildTree(node, pathPrefix, depth) {
         el.className = 'tree-file';
         el.dataset.path = route_path;
         const label = fname
-        el.innerHTML = `<i class="fa-solid fa-file"></i>${label}`;
-
+        /* Does the file name start with ch00 (this may be a book!) */
+        const chapter_match = label.match(/^ch(\d{2})_(.*)/);
+        if(chapter_match) {
+            const digits = chapter_match[1];
+            const chapter_name = chapter_match[2];
+            el.innerHTML = `<i class="fa-solid fa-book-open"></i><span class="chapter-index">${digits}</span>${chapter_name}`;
+        }
+        else {
+            el.innerHTML = `<i class="fa-solid fa-file"></i>${label}`;
+        }
         /* 
             Add this to the file loader functions. This is used by window.location.hashchanged.
             We simply change the window hash on click.
@@ -204,6 +212,9 @@ function resolveCitations(container, yamldata) {
     });
 }
 
+/* 
+    After all the code blocks are rendered, we add event listeners to the copy buttons.
+*/
 function activateCopyButtons(container) {
     container.querySelectorAll('.copy-code-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -351,7 +362,7 @@ function renderMarkdown(text) {
         const block = blocks[parseInt(i)];
         try {
             if (block.type === 'display') {
-                return `<div class="katex-display">${katex.renderToString(block.content, { displayMode: true, throwOnError: false })}</div>`;
+                return `${katex.renderToString(block.content, { displayMode: true, throwOnError: false })}`;
             } else {
                 return katex.renderToString(block.content, { displayMode: false, throwOnError: false });
             }

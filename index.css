@@ -714,8 +714,8 @@ body.sidebar-closed {
 .md-body .katex-display {
     overflow-x: auto;
     overflow-y: hidden;
-    font-size: 1.2em;
-    padding: 0.5rem 0;
+    font-size: 1.1em;
+    padding: 0.1rem 0;
 }
 
 .md-body::selection {
@@ -798,6 +798,10 @@ body.sidebar-closed {
     border-radius: 1px;
 }
 
+.chapter-index {
+    color: rgb(128, 128, 128);
+    font-family: monospace;
+}
 /*
     Section for responsive sidebar behavior. 
     On small screens, the sidebar becomes a sliding 
@@ -844,5 +848,19 @@ body.sidebar-closed {
 
     #main {
         grid-column: 1 / -1; /* full width */
+    }
+
+    #content {
+        max-width: 100vw;
+        padding: 0;
+        margin: 0;
+    }
+
+    .md-body {
+        border: none;
+    }
+
+    .tab-header {
+        width: 100%;
     }
 }
