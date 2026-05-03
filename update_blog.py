@@ -32,7 +32,11 @@ def createManifest(name="root", manifest_root=POSTS_ROOT):
         elif file.endswith(".md"):
             print(f'Adding {full_path}')
             st = os.stat(full_path)
-            timestamp_created = st.st_birthtime
+            try:
+                timestamp_created = st.st_birthtime
+            except:
+                timestamp_created = st.st_ctime
+            
             timestamp_modified = st.st_mtime
             manifest["files"].append({ "timestamp_created": timestamp_created, 
                                       "timestamp_modified": timestamp_modified, 

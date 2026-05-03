@@ -1,7 +1,7 @@
 ---
 title: India-China-Pakistan Military Equipment Tracker
 author: quartermaster
-author_link: https://Discontinued.com/HQuarterMa43504
+author_link: https://x.com/HQuarterMa43504
 ---
 
 ## Air Forces
