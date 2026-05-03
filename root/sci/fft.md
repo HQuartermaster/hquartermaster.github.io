@@ -129,3 +129,36 @@ This is what is called a wave form[@waveform]. It is just a plot of the PCM valu
 
 Our hardware uses PCM data in time space as it is easy to map the movement of the diaphgram to. Yet the our ears and brains work in frequency space. You can "tell" from your ears the difference between a 440 Hz wave and a 100 Hz wave form. Suppose an annoying high pitch sound is part of your PCM data. How do you remove it? You take the Fourier transform of the PCM data, remove the high frequency values, and then do an inverse Fourier transform to get the new PCM data. This is what all audio filters fundamentally do!
 
+## The Discrete Fourier Transform
+
+This expression,
+
+$$ \hat{f}(\omega) = \int_{-\infty}^{\infty}{e^{-2 \pi i \omega t} h(t) dt} $$
+
+...works when $f(t)$ is an analytical function. However, in real life, $f(t)$ is usually a signal, that is being sampled at a finite rate. In reality, we don't really have $f(t)$ as a function. Instead we have $f(t_0), f(t_1), f(t_2) ... f(t_{n})$, i.e., the values of $f$ at discrete points in time. 
+
+For this, we have the discrete variant of the Fourier transform aptly named the Discrete Fourier Transform.
+
+### Derivation of the DFT
+
+Suppose we are sampling the signal $f(t)$ at discrete intervals $T_{s}$, this "discretized" function can actually be represented as $f_{s}(t)$ using the Dirac-delta as follows:
+
+$$ f_{s}(t) = f(t)\sum_{i=0}^{N}{\delta(t - i T_s)} $$
+
+This is quite simple to understand. The Dirac-Delta returns 1 when 0 and 0 otherwise. When $t$ is a multiple of $T_{s}$, the summation only returns 1 (and thus the value of $f(t)$) if we are at a point where the signal is being sampled, otherwise all the $\delta(t - i T_s)$ in the sum are 0 and the function is 0.
+
+Now, we apply Fourier transform to $f_{s}(t)$:
+
+$$ \int_{-\infty}^{\infty}{e^{-i 2\pi \omega t}f(t)\sum_{i=0}^{N}{\delta(t - i T_s)}} dt $$
+
+Taking the summation out,
+
+$$ \sum_{i=0}^{N}{\int_{-\infty}^{\infty}{e^{-i 2\pi \omega t}f(t)\delta(t - i T_s)dt}} $$
+
+The Dirac-Delta has an interesting property, called the **sifting property**:
+
+$$ \int_{-\infty}^{\infty}{f(t)\delta(t - t_{0})} = f(t_{0}) $$
+
+We use the above property to get:
+
+$$ \sum_{i=0}^{N}{e^{-i 2\pi \omega n T_s}f(i T_s)} $$
