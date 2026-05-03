@@ -39,6 +39,11 @@ citations:
         year: 1925
         title: "Quantum Theoretical Reinterpretation of Kinematic and Mechanical Relations"
         link: "https://wucj.lab.westlake.edu.cn/Others/Heisenberg_Quantum_Mechanics.pdf"
+    shannon1949:
+        author: "Claude E. Shannon"
+        year: 1949
+        title: "Communication in the Presence of Noise"
+        link: "https://ieeexplore.ieee.org/document/1697831/"
 ---
 
 # The Fast Fourier Transform
@@ -149,11 +154,11 @@ This is quite simple to understand. The Dirac-Delta returns 1 when 0 and 0 other
 
 Now, we apply Fourier transform to $f_{s}(t)$:
 
-$$ \int_{-\infty}^{\infty}{e^{-i 2\pi \omega t}f(t)\sum_{i=0}^{N}{\delta(t - i T_s)}} dt $$
+$$ \int_{-\infty}^{\infty}{e^{-i 2\pi \omega t}f(t)\sum_{i=0}^{N}{\delta(t - n T_s)}} dt $$
 
 Taking the summation out,
 
-$$ \sum_{i=0}^{N}{\int_{-\infty}^{\infty}{e^{-i 2\pi \omega t}f(t)\delta(t - i T_s)dt}} $$
+$$ \sum_{n=0}^{N}{\int_{-\infty}^{\infty}{e^{-i 2\pi \omega t}f(t)\delta(t - n T_s)dt}} $$
 
 The Dirac-Delta has an interesting property, called the **sifting property**:
 
@@ -161,4 +166,57 @@ $$ \int_{-\infty}^{\infty}{f(t)\delta(t - t_{0})} = f(t_{0}) $$
 
 We use the above property to get:
 
-$$ \sum_{i=0}^{N}{e^{-i 2\pi \omega n T_s}f(i T_s)} $$
+$$ \sum_{n=0}^{N}{e^{-i 2\pi \omega n T_s}f(n T_s)} $$
+
+Now, I am going to make a change of notation to what books typically use. Since we are not working with functions, it is kind of pointless to use $f(n T_s)$. In reality, our "function" is an array of numbers (discrete samples). It is much more apt to define,
+
+$$ x_{n} = f(n T_s) $$
+
+> ### Discretization of Frequency
+> Another thing is that since our time domain is discretized our frequency domain is also discretized. There's a very important thing to remember: if your sampling frequency is $F$ Hz, you cannot measure frequencies more than $\frac{F}{2}$ Hz! This is the famous Nyquist-Shannon Sampling theorem[@shannon1949]. 
+>
+> Why is this the case? 
+>
+> Think of a fan rotating at 30 RPM. To measure the fan speed, you will need at least two snapshots. If a camera takes photos at the rate of 30 photos per minute, you get one shot per minute. Let's say the first shot was taken when the fan was at the the "0" position. The second shot will be taken when the fan turns one revolution (and therefore back at 0). In the camera's reel, the fan would look completely still!
+>
+> What if the camera were to take photos at 45 photos per minute? 
+> - The camera takes the first shot when the fan is at 0.
+> - The second shot is taken when the fan does 2/3 of a revolution , i.e., at angle 240.
+> - The third shot is taken when the fan rotates 4/3, i.e., at angle 480 (which is 120).
+>
+> (and so on)
+> | Shot (N) | Revolution                                     | Degrees                     | Time (s) |
+> |----------|---                                             |---                          |----------|
+> | 1        | 0/3                                            | 0°                          | 0.00     |
+> | 2        | 2/3                                            | 240°                        | 1.33     |
+> | 3        | 4/3                                            | 120°                        | 2.67     |
+> | 4        | 6/3                                            | 0°                          | 4.00     |
+>
+> A revolution took 4 seconds for the camera, while 30 RPMs means 2 seconds per revolution. It would thus appear to the camera that the fan is rotating **backwards** at the rate of 15 RPM!
+>
+> A camera would thus need to take 60 shots per minute to measure a 30 RPM fan. The first shot will be taken at 0, the second at when the fan is half way, and the third shot back at 0, allowing us to capture the full rotation of the fan.
+> 
+> This is the same reason why audio samples are sampled at 44 kHz because the human ear can hear up to 20 kHz, and to sample that range correctly, we need a frequency of at least 40 kHz. The reason we need 44.1 kHz that the additional 4.1 kHz provides a small buffer for anti-aliasing filters to remove frequencies above 40 kHz. (This is not relevant to our discussion)
+
+Since we are in the discrete frequency space, we switch from $\omega$ to a discrete variable, $omega_{k}$.
+
+$$ \omega_{k} = \frac{k}{N T_{s}} \quad \text{for } k = {0, 1, 2, ..., N-1} $$
+
+This is a little harder to explain, and I'll get an intuitive explanation for this in the future. But for now, just keep in mind that our frequency spectrum is discrete and we sample at values $\frac{1}{N T_s}, \frac{2}{N T_s}, ..., \frac{N - 1}{N T_s}$.
+
+Substituting this in the DFT expression, we get:
+
+$$ \sum_{i=0}^{N}{e^{-i 2\pi (\frac{k}{N T_s}) n T_s}x_{n}} $$
+
+$$ X_{k} = \sum_{i=0}^{N}{e^{-i 2\pi k}x_{n}} $$
+
+And that is the expression for the Discrete Fourier Transform.
+
+As you can see, we have values for $0$ to $N - 1$ frequencies to calculate, and each calculation requires a sum of length $N$. Even if we ignored the upper half (as the frequencies repeat, as we discussed before), we will have a complexity of $\frac{N}{2} N$, the algorithm is still $O(N^2)$ in nature.
+
+$O(N^2)$ may not seem like a big deal, but that changes once you see the scale of real-world data. Take audio for example: a 5 minute song sampled at 44,100 Hz contains $ 5 \times 60 \times 44100 = 13,\!230,\!000 $ samples.
+
+A naive $O(N^2)$ Discrete Fourier Transform on this data would require on the order of $ N^2 \approx 1.75\times 10^{14} $ operations. 
+
+That is computationally massive. Even on modern hardware, performing a full naive DFT on such a dataset would be slow as hell. This computational burden is precisely why the **Fast Fourier Transform (FFT)** is so important: by exploiting symmetry and redundancy in the DFT, it reduces the complexity from $ O(N^2)\rightarrow O(N\log N) $ making Fourier analysis feasible for large real-world datasets.
+
