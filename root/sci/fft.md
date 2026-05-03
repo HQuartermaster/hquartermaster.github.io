@@ -202,7 +202,7 @@ Since we are in the discrete frequency space, we switch from $\omega$ to a discr
 
 $$ \omega_{k} = \frac{k}{N T_{s}} \quad \text{for } k = {0, 1, 2, ..., N-1} $$
 
-This is a little harder to explain, and I'll get an intuitive explanation for this in the future. But for now, just keep in mind that our frequency spectrum is discrete and we sample at values $\frac{1}{N T_s}, \frac{2}{N T_s}, ..., \frac{N - 1}{N T_s}$.
+This is a little harder to explain, and I'll get an intuitive explanation for this in the future. But for now, just keep in mind that our frequency spectrum is discrete and we sample at values $0, \frac{1}{N T_s}, \frac{2}{N T_s}, ..., \frac{N - 1}{N T_s}$.
 
 Substituting this in the DFT expression, we get:
 
