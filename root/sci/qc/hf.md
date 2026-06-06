@@ -3,7 +3,6 @@ title: Hartree-Fock Theory
 date: 09-05-2026
 author: quartermaster
 author_link: https://x.com/HQuarterMa43504/
-
 ---
 
 # Hartree-Fock Theory: An Introduction
