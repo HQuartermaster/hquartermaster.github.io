@@ -36,7 +36,7 @@ You don't. Take GPT 4 for instance. It was trained on just 25,000 A100 class GPU
 
 India's own LLM (or I'd called it MLM for now, Medium Language Model), i.e., Sarvam-30B and Sarvam-105B [@sarvamtraining] were trained on just 4,096 NVIDIA H100 GPUs. All these GPUs are within India as of speaking. If you've tried out Sarvam via their Indus app, it is a fairly capable model and now even features the ability to post images and react accordingly to them. 
 
-The Chinese models such as Deepseek R1, Kimi K2.5, and Qwen are all fairly capable. Kimi K2.5 in fact seems to be able to do 90% (don't quote me on that, just anecdotal experience) of whatever Claude Opus 4.8 can do. I have not tried out Fable so I cannot tell but Chinese models should reach Fable capability eventually. None of these companies have billions in evaluation.
+The Chinese models such as Deepseek R1, Kimi K2.5, and Qwen are all fairly capable. Kimi K2.5 in fact seems to be able to do 90% (don't quote me on that, just anecdotal experience) of whatever Claude Opus 4.8 can do. I have not tried out Fable so I cannot tell but Chinese models should reach Fable capability eventually. None of these companies have billions in valuation.
 
 ## So what is the fuss about? 
 
@@ -54,7 +54,7 @@ And to be fair, the true heroes who made LLMs possible are not OpenAI, or Anthro
 
 ## About Talent
 
-Much of the math that is required for LLMs is present in the high school curriculum of the Indian schools system. Linear Algebra, Statistics, Probability, Geometry. Some aspects such as information theory, proving convergence properties, scaling laws would need some tutoring, but it is not something like high energy physics or general relavity that requires a long pedigree of graduate and post-graduate science education to master. Much of LLM research is practical, researchers essentially try things (you can call them educated guesses) until something sticks to a wall, as we do not have a theory of learning. This does not mean that talent is cheap because the number of people who can put that math into highly optimized code to extract as much performance out of a chip as possible is still small enough and highly sought after. 
+Much of the math that is required for LLMs is present in the high school curriculum of the Indian schools system. Linear Algebra, Statistics, Probability, Geometry. Some aspects such as information theory, proving convergence properties, scaling laws would need some tutoring, but it is not something like high energy physics or general relativity that requires a long pedigree of graduate and post-graduate science education to master. Much of LLM research is practical, researchers essentially try things (you can call them educated guesses) until something sticks to a wall, as we do not have a theory of learning. This does not mean that talent is cheap because the number of people who can put that math into highly optimized code to extract as much performance out of a chip as possible is still small enough and highly sought after. 
 
 ## Strategic Implications
 
