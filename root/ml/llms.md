@@ -69,5 +69,3 @@ The strategic implications are massive. In an environment where Pakistan has Chi
 ## What to do? 
 
 Just do it. It's not that hard. We don't have to serve millions of customers like American AI corporations that guzzles billions in compute. Having frontier-class models to serve our researchers, military and industry would be good enough for now. 
-
-In Dhurandhar 4, Hamza joins Hindustan Compute Corporation and goes to Europe with a suitcase containing datasets to train strategic AI models; to bypass export controls or something; idk. 
