@@ -1,0 +1,215 @@
+{
+  "description": "Known ICBMs/SLBMs with their specifications.",
+  "missiles": [
+    {
+      "name":"UGM-133A (W-88)", 
+      "country":"United States", 
+      "country_code":"US", 
+      "range": 7600, 
+      "MIRV": true, 
+      "n_MIRV": 8,
+      "warhead_kt": 475, 
+      "launch_platform":"SSBN"
+    },
+    {
+      "name":"LGM-30G (W-87)", 
+      "country":"United States", 
+      "country_code":"US", 
+      "range": 13000, 
+      "MIRV": false, 
+      "n_MIRV": 1,
+      "warhead_kt": 475, 
+      "launch_platform":"SILO"
+    },
+    {
+      "name":"LGM-30G (W-78)", 
+      "country":"United States", 
+      "country_code":"US", 
+      "range": 11500, 
+      "MIRV": false, 
+      "n_MIRV": 1,
+      "warhead_kt": 335, 
+      "launch_platform":"SILO"
+    },
+    {
+      "name":"UGM-133A (Holbrook)", 
+      "country":"United Kingdom", 
+      "country_code":"GB", 
+      "range": 8100, 
+      "MIRV": true, 
+      "n_MIRV": 10,
+      "warhead_kt": 100, 
+      "launch_platform":"SSBN"
+    },
+    {
+      "name": "SS-X-30 Satan II",
+      "country": "Russia",
+      "country_code": "RU",
+      "range": 18000,
+      "MIRV": true,
+      "n_MIRV": 10,
+      "warhead_kt": 750,
+      "launch_platform": "SILO"
+    },
+    {
+      "name": "SS-27 Mod 2",
+      "country": "Russia",
+      "country_code": "RU",
+      "range": 11000,
+      "MIRV": true,
+      "n_MIRV": 4,
+      "warhead_kt": 750,
+      "launch_platform": "SILO"
+    },
+    {
+      "name": "SS-27 Mod 1",
+      "country": "Russia",
+      "country_code": "RU",
+      "range": 11000,
+      "MIRV": false,
+      "n_MIRV": 1,
+      "warhead_kt": 750,
+      "launch_platform": "TEL"
+    },
+    {
+      "name": "SS-NX-32",
+      "country": "Russia",
+      "country_code": "RU",
+      "range": 10000,
+      "MIRV": true,
+      "n_MIRV": 6,
+      "warhead_kt": 150,
+      "launch_platform": "SSBN"
+    },
+    {
+      "name": "DF-41 (MIRV)",
+      "country": "China",
+      "country_code": "CN",
+      "range": 12000,
+      "MIRV": true,
+      "n_MIRV": 10,
+      "warhead_kt": 150,
+      "launch_platform": "TEL"
+    },
+    {
+      "name": "DF-41 (Reduced Payload)",
+      "country": "China",
+      "country_code": "CN",
+      "range": 15000,
+      "MIRV": true,
+      "n_MIRV": 6,
+      "warhead_kt": 100,
+      "launch_platform": "TEL"
+    },
+    {
+      "name": "DF-31AG",
+      "country": "China",
+      "country_code": "CN",
+      "range": 13000,
+      "MIRV": false,
+      "n_MIRV": 1,
+      "warhead_kt": 300,
+      "launch_platform": "TEL"
+    },
+    {
+      "name": "JL-3",
+      "country": "China",
+      "country_code": "CN",
+      "range": 10000,
+      "MIRV": true,
+      "n_MIRV": 3,
+      "warhead_kt": 250,
+      "launch_platform": "SSBN"
+    },
+    {
+      "name": "JL-2",
+      "country": "China",
+      "country_code": "CN",
+      "range": 7200,
+      "MIRV": true,
+      "n_MIRV": 8,
+      "warhead_kt": 150,
+      "launch_platform": "SSBN"
+    },
+    {
+      "name": "M51",
+      "country": "France",
+      "country_code": "FR",
+      "range": 1000,
+      "MIRV": true,
+      "n_MIRV": 8,
+      "warhead_kt": 125,
+      "launch_platform": "SSBN"
+    },
+    {
+      "name":"Agni V (Single)", 
+      "country":"India", 
+      "country_code":"IN", 
+      "range": 8000, 
+      "MIRV": false, 
+      "n_MIRV": 1,
+      "warhead_kt": 35, 
+      "launch_platform":"TEL"
+    },
+    {
+      "name":"Agni V (MIRV)", 
+      "country":"India", 
+      "country_code":"IN", 
+      "range": 6000, 
+      "MIRV": true, 
+      "n_MIRV": 4,
+      "warhead_kt": 35, 
+      "launch_platform":"TEL"
+    },
+    {
+      "name":"K4", 
+      "country":"India", 
+      "country_code":"IN", 
+      "range": 3500, 
+      "MIRV": false, 
+      "n_MIRV": 1,
+      "warhead_kt": 35, 
+      "launch_platform":"SSBN"
+    },
+    {
+      "name":"K5", 
+      "country":"India", 
+      "country_code":"IN", 
+      "range": 5500, 
+      "MIRV": true, 
+      "n_MIRV": 4,
+      "warhead_kt": 35, 
+      "launch_platform":"SSBN"
+    },
+    {
+      "name":"Hwasong-18", 
+      "country":"North Korea", 
+      "country_code":"KP", 
+      "range": 12000, 
+      "MIRV": false, 
+      "n_MIRV": 1,
+      "warhead_kt": 150, 
+      "launch_platform":"TEL"
+    },
+    {
+      "name":"Hwasong-19", 
+      "country":"North Korea", 
+      "country_code":"KP", 
+      "range": 15000, 
+      "MIRV": false, 
+      "n_MIRV": 1,
+      "warhead_kt": 150, 
+      "launch_platform":"TEL"
+    },
+    {
+      "name":"Jericho-III", 
+      "country":"Israel", 
+      "country_code":"IL", 
+      "range": 4800, 
+      "MIRV": false, 
+      "n_MIRV": 1,
+      "warhead_kt": 20, 
+      "launch_platform":"SILO"
+    }
+  ]
+}

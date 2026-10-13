@@ -25,9 +25,9 @@ Consider a system of nuclei and electrons, this is what we call a "multi-electro
 
 $$ \hat{H} = \sum_{i=0}^{n}{\left(- \frac{\hbar}{2 m_{e}} \nabla_{e,i}^2 - \sum_{A=0}^{N}{\frac{Z_{A}e^2}{4 \pi \epsilon_{0} |r_{i} - R_{A}|}}\right)} + \sum_{A < B}^{N}{\frac{Z_{A}Z_{B}e^2}{4 \pi \epsilon_{0} |R_{A} - R_{B}|}} + \sum_{i < j}{\frac{e^2}{4 \pi \epsilon_{0} |r_{i} - r_{j}|}} + \sum_{A=0}^{N}{- \frac{\hbar^2}{2 m_{A}} \nabla_{A}^2} $$
 
-That is a mouthful of an expression. But it's just high school physics.
+This is a big expression. But it is ultimately just high school physics.
 
-Remember that the Hamiltonian operator acts on a function to yield the energy times that said function (that is the point of $\hat{H} \Psi = E \Psi$). In more technical terms, we say that the function $\Psi$ is an *eigenfunction* of the Hamiltonian operator and the energy $E$ is the *eigenvalue*, drawing parallels to linear algebra. Most of quantum mechanics in practice is finding out these eigenfunctions and eigenvalues.
+Recall that the Hamiltonian operator acts on a function to yield the energy times that said function (that is the point of $\hat{H} \Psi = E \Psi$). In more technical terms, we say that the function $\Psi$ is an *eigenfunction* of the Hamiltonian operator and the energy $E$ is the *eigenvalue*, drawing parallels to linear algebra. Most of quantum mechanics in practice is finding out these eigenfunctions and eigenvalues.
 
 So each term in the Hamiltonian actually corresponds to the energy. Let's review them.
 
@@ -55,15 +55,15 @@ Let's say we have 30 electrons. The electronic wavefunction will have a dimensio
 
 $$ 100 \times 100 \times \ldots \text{90 times} \ldots \times 100 = 100^{90} $$
 
-If each grid point is storing the value of the wavefunction as a 32-bit float (4 bytes), we would need $ 4 \times 100^{90} $ bytes of data just to store the wavefunction. That is $\approx 10^{171}$ GB of data! Is it because our computers are weak? Well, consider a bit to be stored in the Hydrogen atom (the simplest classical/quantum memory bit possible). A hydrogen atom has a mass of $1.67 \times 10^{-27}$ kg. To store $3.2 \times 10^{172}$ **bits** we would need a memory unit made entirely of Hydrogen atoms weighing $10^{145}$ kg. The mass of the Earth, by the way, is $10^{24}$ kg. Up till now, even with all this science fiction, **it is impossible**.
+If each grid point is storing the value of the wavefunction as a 32-bit float (4 bytes), we would need $ 4 \times 100^{90} $ bytes of data just to store the wavefunction. That is $\approx 10^{171}$ GB of data! Is it because our computers are weak? Well, consider a bit to be stored in the Hydrogen atom (the simplest classical/quantum memory bit possible). A hydrogen atom has a mass of $1.67 \times 10^{-27}$ kg. To store $3.2 \times 10^{172}$ **bits** we would need a memory unit made entirely of Hydrogen atoms weighing $10^{145}$ kg. The mass of the Earth is $10^{24}$ kg. Up till now, even with all this science fiction, **it is impossible**.
 
 And this is just for 30 electrons with a coarse grid of 100 points!
 
-We cannot solve the SE analytically or numerically. But do we need to? If we could just approximate a solution...*drumroll*
-
-Enter Hartree-Fock Theory.
+We therefore cannot solve the Schrodinger equation for large systems either analytically or numerically. This is why we required a series of approximations that end up resulting in the Hartree-Fock theory, the bedrock of modern quantum chemistry.
 
 ## ACT I: The Born-Oppenheimer Approximation
+
+
 
 ## ACT II: Single Slater Ansatz
 

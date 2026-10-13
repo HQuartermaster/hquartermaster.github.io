@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Explore geographic range circles on a world map or globe.">
+	<title>ICBM Atlas</title>
+	<link rel="stylesheet" href="styles.css">
+	<script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+	<script defer src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+	<script defer src="app.js"></script>
+</head>
+
+<body>
+	<header><a class="brand" href="./"><span class="brand-mark">◎</span> ICBM<span
+				class="brand-light">ATLAS</span></a><span class="header-note">ICBM RANGE EXPLORER</span><span
+			class="live-indicator">INTERACTIVE MAP</span></header>
+	<main>
+		<section class="map-panel" aria-label="Range map">
+			<div class="map-toolbar">
+				<div>
+					<h1>Explore the reach.</h1>
+					<p class="subtitle">Select a missile. Click the map to place its range.</p>
+				</div>
+				<div class="map-actions">
+					<div class="projection-switch" aria-label="Map projection">
+						<button id="mercator-button" aria-pressed="true">▧ Mercator</button><button id="globe-button"
+							aria-pressed="false">◎ Globe</button>
+					</div><button id="clear-button" class="quiet-button" disabled>Clear <span>×</span></button>
+				</div>
+			</div>
+			<div id="map-container"><svg id="world-map" role="img"
+					aria-label="World map. Click to place the selected missile; drag to pan or rotate; scroll to zoom."></svg>
+				<div class="map-badge">
+					<span class="status-dot"></span><span id="projection-label">MERCATOR PROJECTION</span>
+				</div>
+				<div class="zoom-controls">
+					<button id="zoom-in" aria-label="Zoom in">+</button>
+					<button id="zoom-out" aria-label="Zoom out">−</button>
+					<button id="reset-view" aria-label="Reset map view">⌂</button>
+				</div>
+				<div class="map-hint" id="map-hint">
+					Click anywhere on the map to place a range
+				</div>
+				<div class="map-legend">
+					<span class="range-swatch"></span> Missile range <span class="origin-swatch"></span> Launch point
+				</div>
+				<div class="coordinate" id="coordinates">— ° N &nbsp; — ° E</div>
+			</div>
+			<footer>
+				<span><span id="placement-count">0</span> launch points placed</span><span>Drag to move · Scroll to
+					zoom</span><span>Distances use a spherical Earth model</span>
+			</footer>
+		</section>
+
+		<aside>
+			<div class="catalog-heading">
+				<div>
+					<p class="eyebrow">THE COLLECTION</p>
+					<h2>Missile library <span id="missile-count">0</span></h2>
+				</div>
+				<label class="import-button" title="Load a JSON missile list">↥<span class="sr-only">Import
+						JSON</span><input id="json-input" type="file" accept=".json,application/json"></label>
+			</div>
+			<label class="search-box"><span>⌕</span><input id="missile-search" type="search"
+					placeholder="Search missile or country…" aria-label="Search missiles"></label>
+			<div class="list-heading"><span>MISSILE / COUNTRY</span><span>RANGE & YIELD</span>
+			</div>
+			<div id="missile-list" role="listbox" aria-label="Missile selection" tabindex="0">
+
+			</div>
+			<section id="selected-details" aria-label="Selected missile details"></section>
+			<p class="data-note" id="data-note">Data is not meant to be authoritative, only a rough estimate · Import
+				your own JSON using ↥</p>
+			<p id="status" role="status" aria-live="polite"></p>
+		</aside>
+	</main>
+</body>
+
+</html>
