@@ -20,8 +20,8 @@ const number_format = new Intl.NumberFormat('en-US');
 
 const platform_icons = {
 	"ssbn": './icons/ssbn.png',
-  	"tel": './icons/tel.png',
-  	"silo": './icons/silo.png'
+	"tel": './icons/tel.png',
+	"silo": './icons/silo.png'
 };
 
 let missiles = [];
@@ -264,13 +264,13 @@ async function initializeMap() {
 	new ResizeObserver(updateProjection).observe(map_container);
 	setStatus('Loading map and missile library…');
 	const results = await Promise.allSettled([
-		d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json'),
+		loadWorldMap(),
 		d3.json('./missiles.json')
 	]);
 	const errors = [];
 	if (results[0].status === 'fulfilled') {
 		const world = results[0].value;
-		land_layer.selectAll('path').data(topojson.feature(world, world.objects.countries).features).join('path').attr('class', 'land');
+		land_layer.selectAll('path').data(world.features).join('path').attr('class', 'land');
 		world_ready = true;
 	} else errors.push('Map unavailable. Check your internet connection and reload.');
 	if (results[1].status === 'fulfilled') {
@@ -279,6 +279,41 @@ async function initializeMap() {
 	} else errors.push('Could not load missiles.json. Serve the page over HTTP, or use ↥ to import JSON.');
 	setStatus(errors.join(' '));
 	renderMap();
+}
+
+/* 
+	Use the India legal map instead of the international one.
+*/
+async function loadWorldMap() {
+	const [original_world, regional_map] = await Promise.all([
+		d3.json('./data/countries-110m.json'),
+		d3.json('./data/india-legal.topojson')
+	]);
+
+	const original_features = topojson.feature(
+		original_world,
+		original_world.objects.countries
+	).features;
+
+	const regional_features = topojson.feature(
+		regional_map,
+		regional_map.objects.countries
+	).features;
+
+	const replaced_names = new Set([
+		'India', 'Pakistan', 'China', 'Afghanistan',
+		'Nepal', 'Bhutan', 'Bangladesh', 'Myanmar'
+	]);
+
+	return {
+		type: 'FeatureCollection',
+		features: [
+			...original_features.filter(
+				feature => !replaced_names.has(feature.properties.name)
+			),
+			...regional_features
+		]
+	};
 }
 
 initializeMap();
