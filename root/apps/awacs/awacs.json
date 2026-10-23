@@ -1,0 +1,82 @@
+[
+  {
+    "name": "Shaanxi KJ-500",
+    "airframe": "Shaanxi Y-8",
+    "airframe_range": 5600,
+    "instrument_range": 600,
+    "coverage": 360,
+    "icon": "./data/y8.png",
+    "detection_curve": "function detect(dist, rcs) { return dist <= 225 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 470 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "country": "CN"
+  },
+  {
+    "name": "Shaanxi KJ-2000",
+    "airframe": "Ilyushin Il-76",
+    "airframe_range": 5500,
+    "instrument_range": 600,
+    "coverage": 360,
+    "icon": "./data/il76.png",
+    "detection_curve": "function detect(dist, rcs) { return dist <= 225 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 470 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "country": "CN"
+  },
+  {
+    "name": "Xi'an KJ-3000",
+    "airframe": "Xi'an Y-20",
+    "airframe_range": 7800,
+    "instrument_range": 750,
+    "coverage": 360,
+    "icon": "./data/c17.png",
+    "detection_curve": "function detect(dist, rcs) { return dist <= 250 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 530 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "country": "CN"
+  },
+  {
+    "name": "Beriev A-50U",
+    "airframe": "Ilyushin Il-76MD",
+    "airframe_range": 7500,
+    "instrument_range": 650,
+    "coverage": 360,
+    "icon": "./data/il76.png",
+    "detection_curve": "function detect(dist, rcs) { return dist <= 215 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 450 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "country": "RU"
+  },
+  {
+    "name": "E-3F Sentry",
+    "airframe": "Boeing 707-320B",
+    "airframe_range": 9250,
+    "instrument_range": 520,
+    "coverage": 360,
+    "icon": "./data/b707.png",
+    "detection_curve": "function detect(dist, rcs) { return dist <= 190 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 400 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "country": "FR"
+  },
+  {
+    "name": "E-7A Wedgetail",
+    "airframe": "Boeing 737-700 IGW",
+    "airframe_range": 6500,
+    "instrument_range": 600,
+    "coverage": 360,
+    "icon": "./data/b737.png",
+    "detection_curve": "function detect(dist, rcs) { return dist <= 230 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 480 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "country": "US"
+  },
+  {
+    "name": "DRDO Netra Mk1",
+    "airframe": "Embraer ERJ-145",
+    "airframe_range": 2500,
+    "instrument_range": 500,
+    "coverage": 270,
+    "icon": "./data/erj145.png",
+    "detection_curve": "function detect(dist, rcs) { return dist <= 225 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 470 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "country": "IN"
+  },
+  {
+    "name": "SAAB Erieye",
+    "airframe": "Saab 2000",
+    "airframe_range": 2868,
+    "instrument_range": 450,
+    "coverage": 300,
+    "icon": "./data/saab2k.png",
+    "detection_curve": "function detect(dist, rcs) { return dist <= 170 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 350 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "country": "SE"
+  }
+]

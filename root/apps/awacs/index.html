@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>AWACS Atlas</title>
+	<link rel="stylesheet" href="./data/vendor/maplibre-gl.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+	<header><a class="brand" href="./"><span class="brand-mark">◉</span> AWACS <span>ATLAS</span></a><span
+			class="header-note">AIRBORNE EARLY WARNING VISUALIZATION</span><button id="about-button"
+			class="quiet">How? ↗</button></header>
+	<main>
+		<section class="map-panel">
+			<div id="map-shell">
+				<div id="map" aria-label="Interactive Mercator terrain map"></div><svg id="tethers"
+					aria-hidden="true"></svg>
+				<div id="aircraft-overlay"></div>
+				<div class="view-controls" role="group" aria-label="Map view"><button id="flat-button"
+						class="quiet">2D</button><button id="terrain-button" class="quiet active">3D
+						terrain</button><button id="home-button" class="quiet" title="Return to the Himalayas"><span
+							class="fa fa-home"></span></button></div>
+				<div class="map-badge">MERCATOR <span> / </span> TERRAIN 1×</div>
+				<div id="placement-hint" hidden></div>
+				<div class="placement"><button id="place-awacs">＋ Place AWACS</button><button id="place-target">＋ Place
+						Target</button></div>
+				<div class="legend"><span><i class="swatch visible"></i>Line of sight</span><span><i
+							class="swatch shadow"></i>Masked</span><span><i class="dot detect"></i>Detect</span><span><i
+							class="dot lock"></i>Lock</span><span><i class="dot lost"></i>Lost</span></div>
+				<div id="coordinates">30.00° N / 78.00° E</div>
+			</div>
+			<footer><span id="status" role="status">Loading terrain atlas…</span><span>Drag aircraft to move ·
+					right-drag to tilt · scroll to zoom</span></footer>
+		</section>
+		<aside>
+			<div id="inspector"></div>
+
+			<section class="coverage-settings">
+				<p class="eyebrow">VISIBILITY OVERLAY</p>
+				<label class="check"><input id="show-coverage" type="checkbox" checked>Show coverage & terrain
+					shadows</label>
+				<label for="overlay-altitude">Reference target altitude <output id="overlay-value">26,000 ft
+						ASL</output></label>
+				<input id="overlay-altitude" type="range" min="0" max="60000" step="500" value="26000">
+				<p>Shading shows geometric visibility at this altitude. Each aircraft is evaluated at its own
+					altitude.<br>
+				<div id="track-count">0 TARGETS ON MAP</div>
+				</p>
+			</section>
+
+			<div>
+
+			</div>
+
+			<div class="catalog-heading">
+				<h2>Aircraft library <span id="catalog-count"></span></h2>
+			</div><label class="search-box"><span>⌕</span><input id="catalog-search" type="search"
+					placeholder="Search AWACS or airframe" aria-label="Search AWACS catalogue"></label>
+			<div class="list-caption"><span>AEW&C PLATFORMS</span><span>SELECT TO PLACE</span></div>
+			<div id="catalog"></div>
+
+			<p class="data-note">Illustrative radar curves & aircraft values. Geometry uses a spherical Earth and
+				sampled elevation. <button id="notes-link">Read model notes</button></p>
+		</aside>
+	</main>
+	<dialog id="picker">
+		<div class="dialog-heading">
+			<div>
+				<p class="eyebrow">AIRCRAFT LIBRARY</p>
+				<h2 id="picker-title">Place AWACS</h2>
+			</div><button class="close" id="close-picker" aria-label="Close aircraft picker">×</button>
+		</div><label class="search-box"><span>⌕</span><input id="picker-search" type="search"
+				placeholder="Search aircraft…" aria-label="Search aircraft"></label>
+		<div id="picker-list"></div>
+		<p class="dialog-note">Select an aircraft, then click the map to place it. Esc cancels.</p>
+	</dialog>
+	<dialog id="notes">
+		<div class="dialog-heading">
+			<h2>How does it work?</h2><button class="close" id="close-notes" aria-label="Close model notes">×</button>
+		</div>
+		<p>This is an educational geometry model. Catalogue ranges, RCS values and detection curves are illustrative,
+			not validated aircraft performance.</p>
+		<p>Terrain from <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noreferrer">Mapzen /
+				AWS Terrain Tiles</a> is bundled locally in data/terrain/. Global zoom levels 0–5 cover Mercator
+			latitudes ±85.05°. The map renders real elevation at 1× scale. Aircraft altitude is feet above sea level,
+			independent of ground elevation.</p>
+		<p>Visibility tests the straight chord between two aircraft against a spherical Earth (6,371 km radius),
+			sampling approximately every 2 km. Terrain is decoded from the same local zoom-5 Terrarium tiles used by the
+			map, approximately 2.5–5 km pixel spacing at low to middle latitudes. Narrow ridges may be missed. No
+			atmospheric refraction, clutter, electronic warfare, aspect or weather model is included.</p>
+		<p>The overlay samples up to 3° bearings and 10 km radial steps, at the reference altitude. Green means line of
+			sight; purple means masked or below terrain; grey means missing elevation. The dashed arc is instrument
+			range, not airframe endurance range. Target results also apply field of view, slant range, RCS and the
+			catalogue function.</p>
+		<p>LOST = grey dot · DETECT = yellow glow · LOCK = red glow. Heading is clockwise from true north. A 270° field
+			is centred on heading. A 360° field is unaffected by heading.</p>
+		<p>Data or curve failures are shown as unknown, never treated as confirmed visibility. Changes save in this
+			browser automatically. WebGL and a static HTTP/HTTPS server are required. Flags load from FlagCDN; map,
+			terrain, fonts and scripts are local.</p>
+		<p>Basemap: <a href="https://www.naturalearthdata.com/about/terms-of-use/">Natural Earth (public domain)</a>.
+			Flags: <a href="https://flagcdn.com">FlagCDN</a>. Elevation: <a
+				href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md">Mapzen terrain attribution</a>.
+		</p>
+	</dialog>
+	<script src="./data/vendor/maplibre-gl.js"></script>
+	<script type="module" src="app.js"></script>
+</body>
+
+</html>

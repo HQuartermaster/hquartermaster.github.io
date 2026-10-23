@@ -1,0 +1,44 @@
+[
+  {
+    "name": "4.5G Light (LCA)",
+    "rcs": 0.5,
+    "icon": "./data/lca.png",
+    "country": "IN"
+  },
+  {
+    "name": "4.5G Medium (Rafale)",
+    "rcs": 0.1,
+    "icon": "./data/rafale.png",
+    "country": "FR"
+  },
+  {
+    "name": "4.5G Heavy (Su30-MKI)",
+    "rcs": 8,
+    "icon": "./data/su30mki.png",
+    "country": "IN"
+  },
+  {
+    "name": "5G / VLO (F-XX)",
+    "rcs": 0.005,
+    "icon": "./data/fxx.png",
+    "country": "US"
+  },
+  {
+    "name": "5G / VLO (J-XX)",
+    "rcs": 0.01,
+    "icon": "./data/fxx.png",
+    "country": "CN"
+  },
+  {
+    "name": "Transport (C-17)",
+    "rcs": 250,
+    "icon": "./data/c17.png",
+    "country": "US"
+  },
+  {
+    "name": "Tanker (Il-76)",
+    "rcs": 250,
+    "icon": "./data/il76.png",
+    "country": "RU"
+  }
+]
