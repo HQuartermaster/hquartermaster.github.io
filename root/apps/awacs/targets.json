@@ -7,7 +7,7 @@
   },
   {
     "name": "4.5G Medium (Rafale)",
-    "rcs": 0.1,
+    "rcs": 0.75,
     "icon": "./data/rafale.png",
     "country": "FR"
   },
