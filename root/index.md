@@ -12,3 +12,5 @@ Some other interesting things:
 
 - [India, China, Pakistan Military Equipment Tracker](#/geopolitics/icp_tracker.md)
 - [Tracking F-404 deliveries to India](#/geopolitics/f404.md)
+- [AWACS Visualizer](/root/apps/awacs)
+- [ICBM Visualizer](/root/apps/icbmexp)
