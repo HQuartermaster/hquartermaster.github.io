@@ -19,6 +19,7 @@
 			<div id="map-shell">
 				<div id="map" aria-label="Interactive Mercator terrain map"></div><svg id="tethers"
 					aria-hidden="true"></svg>
+				<svg id="sight-lines" aria-hidden="true"></svg>
 				<div id="aircraft-overlay"></div>
 				<div class="view-controls" role="group" aria-label="Map view"><button id="flat-button"
 						class="quiet">2D</button><button id="terrain-button" class="quiet active">3D
@@ -27,7 +28,7 @@
 				<div class="map-badge">MERCATOR <span> / </span> TERRAIN 1×</div>
 				<div id="placement-hint" hidden></div>
 				<div class="placement"><button id="place-awacs">＋ Place AWACS</button><button id="place-target">＋ Place
-						Target</button></div>
+						Target</button><button id="clear-map">Clear Map</button></div>
 				<div class="legend"><span><i class="swatch visible"></i>Line of sight</span><span><i
 							class="swatch shadow"></i>Masked</span><span><i class="dot detect"></i>Detect</span><span><i
 							class="dot lock"></i>Lock</span><span><i class="dot lost"></i>Lost</span></div>
@@ -37,12 +38,19 @@
 					right-drag to tilt · scroll to zoom</span></footer>
 		</section>
 		<aside>
+			<section class="scenario-controls" aria-label="Battle scenario files">
+				<button id="export-scenario" class="quiet">Export Scenario</button>
+				<button id="load-scenario" class="quiet">Load Scenario</button>
+				<input id="scenario-file" type="file" accept=".json,application/json" hidden>
+				<p id="scenario-message" class="data-note" role="status">Loading a scenario replaces the current map.</p>
+			</section>
 			<div id="inspector"></div>
 
 			<section class="coverage-settings">
 				<p class="eyebrow">VISIBILITY OVERLAY</p>
 				<label class="check"><input id="show-coverage" type="checkbox" checked>Show coverage & terrain
 					shadows</label>
+				<label class="check"><input id="show-sight-lines" type="checkbox" checked>Show AWACS–target line of sight</label>
 				<label for="overlay-altitude">Reference target altitude <output id="overlay-value">26,000 ft
 						ASL</output></label>
 				<input id="overlay-altitude" type="range" min="0" max="60000" step="500" value="26000">
@@ -96,8 +104,26 @@
 			sight; purple means masked or below terrain; grey means missing elevation. The dashed arc is instrument
 			range, not airframe endurance range. Target results also apply field of view, slant range, RCS and the
 			catalogue function.</p>
-		<p>LOST = grey dot · DETECT = yellow glow · LOCK = red glow. Heading is clockwise from true north. A 270° field
+		<p>Catalogue detect(dist, rcs) functions return detection probability P_d from 0 to 1, using slant distance in
+			kilometres and RCS in m². Smooth logistic curves retain the fourth-root RCS range scaling: the previous
+			lock range corresponds to P_d = 90%, and the previous detection range to P_d = 50%.</p>
+		<p>LOCK: P_d ≥ 90% (red glow). DETECT: 50% ≤ P_d &lt; 90% (yellow glow). LOST: P_d &lt; 50% (grey dot).
+			These are illustrative confidence cutoffs, not a validated tracking model. Results are deterministic;
+			no random detection trials or scan history are simulated. Terrain masking, instrument range and field of
+			view force P_d to zero; missing data or invalid curves leave P_d unknown.</p>
+		<p>Heading is clockwise from true north. A 270° field
 			is centred on heading. A 360° field is unaffected by heading.</p>
+		<p>Place any number of AWACS (up to 500 aircraft total). Each target combines all AWACS probabilities using
+			P_d combined = 1 − ∏(1 − P_d), assuming independent detections. Shared blind spots can make this assumption
+			overoptimistic. Missing data leaves the combined probability UNKNOWN unless a known source gives 100%.
+			The displayed slant distance is to the nearest AWACS. Yellow lines connect aircraft with confirmed geometric
+			line of sight, even outside radar range or field of view; use the checkbox to hide them.
+			Coverage is cached per AWACS position, altitude, radar sector and reference target altitude. Moving a target
+			does not recalculate coverage. Overlapping coverage is merged: visible green takes precedence, then unknown
+			grey, then masked purple. Shading describes geometric visibility, not combined detection probability.</p>
+		<p>Export Scenario downloads a JSON file with aircraft positions, altitudes, headings and map settings.
+			Load Scenario replaces the map after validating the file. Aircraft use the current local catalogue.
+			Clear Map removes all aircraft. Scenario files retain AWACS placement order.</p>
 		<p>Data or curve failures are shown as unknown, never treated as confirmed visibility. Changes save in this
 			browser automatically. WebGL and a static HTTP/HTTPS server are required. Flags load from FlagCDN; map,
 			terrain, fonts and scripts are local.</p>
@@ -107,6 +133,7 @@
 		</p>
 	</dialog>
 	<script src="./data/vendor/maplibre-gl.js"></script>
+	<script src="./data/vendor/polygon-clipping.js"></script>
 	<script type="module" src="app.js"></script>
 </body>
 

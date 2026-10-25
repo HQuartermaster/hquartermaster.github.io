@@ -1,5 +1,7 @@
 export const earth_radius = 6371000;
 export const feet_to_meters = 0.3048;
+// Illustrative UI cutoffs; catalogue curves return P_d in [0, 1].
+export const detection_thresholds = Object.freeze({ lock: 0.90, detect: 0.50 });
 const degrees_to_radians = Math.PI / 180;
 const radians_to_degrees = 180 / Math.PI;
 
@@ -69,13 +71,28 @@ export function traceVisibility(start, start_altitude, end, end_altitude, getEle
 
 export function classifyTarget(aircraft, target, getElevation) {
   const distance = slantDistance(aircraft.position, aircraft.altitude * feet_to_meters, target.position, target.altitude * feet_to_meters) / 1000;
-  if (distance > aircraft.data.instrument_range) return {state: 'LOST', reason: 'Beyond instrument range', distance};
-  if (!withinSector(initialBearing(aircraft.position, target.position), aircraft.heading, aircraft.data.coverage)) return {state: 'LOST', reason: 'Outside field of view', distance};
+  if (distance > aircraft.data.instrument_range) return {state: 'LOST', P_d: 0, reason: 'Beyond instrument range', distance};
+  if (!withinSector(initialBearing(aircraft.position, target.position), aircraft.heading, aircraft.data.coverage)) return {state: 'LOST', P_d: 0, reason: 'Outside field of view', distance};
   const visibility = traceVisibility(aircraft.position, aircraft.altitude * feet_to_meters, target.position, target.altitude * feet_to_meters, getElevation);
-  if (visibility.state !== 'VISIBLE') return {...visibility, distance};
+  if (visibility.state !== 'VISIBLE') return {...visibility, P_d: visibility.state === 'LOST' ? 0 : null, distance};
   try {
-    const state = aircraft.detect(distance, target.data.rcs);
-    if (!['LOST', 'DETECT', 'LOCK'].includes(state)) throw new Error('Invalid curve result');
-    return {state, reason: state === 'LOST' ? 'Below illustrative detection threshold' : 'Line of sight + illustrative curve', distance};
-  } catch { return {state: 'UNKNOWN', reason: 'Invalid detection curve', distance}; }
+    const P_d = aircraft.detect(distance, target.data.rcs);
+    if (!Number.isFinite(P_d) || P_d < 0 || P_d > 1) throw new Error('Invalid curve result');
+    const state = P_d >= detection_thresholds.lock ? 'LOCK' : P_d >= detection_thresholds.detect ? 'DETECT' : 'LOST';
+    return {state, P_d, reason: state === 'LOST' ? 'Below illustrative detection threshold' : 'Line of sight + illustrative curve', distance};
+  } catch { return {state: 'UNKNOWN', P_d: null, reason: 'Invalid detection curve', distance}; }
+}
+
+// Illustrative independent-source fusion: probability of at least one detection.
+export function classifyWithAwacs(aircraft_list, target, getElevation) {
+  if (!aircraft_list.length) return { state: 'LOST', P_d: 0, reason: 'No AWACS placed' };
+  const results = aircraft_list.map(aircraft => classifyTarget(aircraft, target, getElevation));
+  const miss_probability = results.reduce((miss, result) => miss * (1 - (result.P_d ?? 0)), 1);
+  const distance = Math.min(...results.map(result => result.distance));
+  if (results.some(result => result.P_d == null) && miss_probability !== 0) {
+    return { state: 'UNKNOWN', P_d: null, reason: 'Combined probability unknown: missing data or invalid curve for an AWACS source', distance };
+  }
+  const P_d = 1 - miss_probability;
+  const state = P_d >= detection_thresholds.lock ? 'LOCK' : P_d >= detection_thresholds.detect ? 'DETECT' : 'LOST';
+  return { state, P_d, reason: `Combined ${aircraft_list.length} AWACS sources (independent detections)`, distance };
 }

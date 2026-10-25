@@ -6,7 +6,7 @@
     "instrument_range": 600,
     "coverage": 360,
     "icon": "./data/y8.png",
-    "detection_curve": "function detect(dist, rcs) { return dist <= 225 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 470 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "detection_curve": "function detect(dist, rcs) { if (!Number.isFinite(dist) || dist < 0 || !Number.isFinite(rcs) || rcs < 0) return NaN; if (rcs === 0) return 0; const scaled_dist = dist / Math.pow(rcs, 0.25); return 1 / (1 + Math.exp(Math.log(9) * (scaled_dist - 470) / (470 - 225))); }",
     "country": "CN"
   },
   {
@@ -16,7 +16,7 @@
     "instrument_range": 600,
     "coverage": 360,
     "icon": "./data/il76.png",
-    "detection_curve": "function detect(dist, rcs) { return dist <= 225 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 470 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "detection_curve": "function detect(dist, rcs) { if (!Number.isFinite(dist) || dist < 0 || !Number.isFinite(rcs) || rcs < 0) return NaN; if (rcs === 0) return 0; const scaled_dist = dist / Math.pow(rcs, 0.25); return 1 / (1 + Math.exp(Math.log(9) * (scaled_dist - 470) / (470 - 225))); }",
     "country": "CN"
   },
   {
@@ -26,7 +26,7 @@
     "instrument_range": 750,
     "coverage": 360,
     "icon": "./data/c17.png",
-    "detection_curve": "function detect(dist, rcs) { return dist <= 250 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 530 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "detection_curve": "function detect(dist, rcs) { if (!Number.isFinite(dist) || dist < 0 || !Number.isFinite(rcs) || rcs < 0) return NaN; if (rcs === 0) return 0; const scaled_dist = dist / Math.pow(rcs, 0.25); return 1 / (1 + Math.exp(Math.log(9) * (scaled_dist - 530) / (530 - 250))); }",
     "country": "CN"
   },
   {
@@ -36,7 +36,7 @@
     "instrument_range": 650,
     "coverage": 360,
     "icon": "./data/il76.png",
-    "detection_curve": "function detect(dist, rcs) { return dist <= 215 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 450 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "detection_curve": "function detect(dist, rcs) { if (!Number.isFinite(dist) || dist < 0 || !Number.isFinite(rcs) || rcs < 0) return NaN; if (rcs === 0) return 0; const scaled_dist = dist / Math.pow(rcs, 0.25); return 1 / (1 + Math.exp(Math.log(9) * (scaled_dist - 450) / (450 - 215))); }",
     "country": "RU"
   },
   {
@@ -46,7 +46,7 @@
     "instrument_range": 520,
     "coverage": 360,
     "icon": "./data/b707.png",
-    "detection_curve": "function detect(dist, rcs) { return dist <= 190 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 400 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "detection_curve": "function detect(dist, rcs) { if (!Number.isFinite(dist) || dist < 0 || !Number.isFinite(rcs) || rcs < 0) return NaN; if (rcs === 0) return 0; const scaled_dist = dist / Math.pow(rcs, 0.25); return 1 / (1 + Math.exp(Math.log(9) * (scaled_dist - 400) / (400 - 190))); }",
     "country": "FR"
   },
   {
@@ -56,7 +56,7 @@
     "instrument_range": 600,
     "coverage": 360,
     "icon": "./data/b737.png",
-    "detection_curve": "function detect(dist, rcs) { return dist <= 230 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 480 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "detection_curve": "function detect(dist, rcs) { if (!Number.isFinite(dist) || dist < 0 || !Number.isFinite(rcs) || rcs < 0) return NaN; if (rcs === 0) return 0; const scaled_dist = dist / Math.pow(rcs, 0.25); return 1 / (1 + Math.exp(Math.log(9) * (scaled_dist - 480) / (480 - 230))); }",
     "country": "US"
   },
   {
@@ -66,7 +66,7 @@
     "instrument_range": 500,
     "coverage": 270,
     "icon": "./data/erj145.png",
-    "detection_curve": "function detect(dist, rcs) { return dist <= 225 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 470 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "detection_curve": "function detect(dist, rcs) { if (!Number.isFinite(dist) || dist < 0 || !Number.isFinite(rcs) || rcs < 0) return NaN; if (rcs === 0) return 0; const scaled_dist = dist / Math.pow(rcs, 0.25); return 1 / (1 + Math.exp(Math.log(9) * (scaled_dist - 470) / (470 - 225))); }",
     "country": "IN"
   },
   {
@@ -76,7 +76,17 @@
     "instrument_range": 450,
     "coverage": 300,
     "icon": "./data/saab2k.png",
-    "detection_curve": "function detect(dist, rcs) { return dist <= 170 * Math.pow(rcs, 0.25) ? 'LOCK' : dist <= 350 * Math.pow(rcs, 0.25) ? 'DETECT' : 'LOST'; }",
+    "detection_curve": "function detect(dist, rcs) { if (!Number.isFinite(dist) || dist < 0 || !Number.isFinite(rcs) || rcs < 0) return NaN; if (rcs === 0) return 0; const scaled_dist = dist / Math.pow(rcs, 0.25); return 1 / (1 + Math.exp(Math.log(9) * (scaled_dist - 350) / (350 - 170))); }",
     "country": "SE"
+  },
+  {
+    "name": "Heavy AESA Fighter (J-16)",
+    "airframe": "J-16",
+    "airframe_range": 1500,
+    "instrument_range": 250,
+    "coverage": 140,
+    "icon": "./data/j16.png",
+    "detection_curve": "function detect(dist, rcs) { return (!Number.isFinite(dist) || dist < 0 || !Number.isFinite(rcs) || rcs < 0) ? NaN : (rcs === 0 || dist > 250) ? 0 : 1 / (1 + Math.exp(Math.log(9) * (dist / Math.pow(rcs, 0.25) - 220) / 110)); }",
+    "country": "CN"
   }
 ]

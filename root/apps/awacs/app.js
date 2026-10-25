@@ -1,12 +1,14 @@
-import { destinationPoint, initialBearing, feet_to_meters, traceVisibility, classifyTarget } from './geometry.js';
+import { destinationPoint, initialBearing, feet_to_meters, traceVisibility, classifyWithAwacs } from './geometry.js';
 import { ensureTerrain, getElevation } from './terrain.js';
 import { updateCountryLabels } from './labels.js';
+import { validateScenario } from './scenario.js';
+import { combineCoverage } from './coverage.js';
 
 const byId = id => document.getElementById(id);
 const formatNumber = value => Math.round(value).toLocaleString('en-US');
 let awacs_catalog = [];
 let target_catalog = [];
-let placed_awacs = null;
+let placed_awacs = [];
 let placed_targets = [];
 let selected_aircraft = null;
 let pending_placement = null;
@@ -18,10 +20,14 @@ let update_timer = null;
 let update_revision = 0;
 let is_3d = true;
 let drag_state = null;
+let sight_pairs = [];
+let coverage_cache = new WeakMap();
+let published_coverage = [];
+let published_show_coverage = null;
 const storage_key = 'awacs-atlas-v1';
 
 function setStatus(message) { byId('status').textContent = message; }
-function getAircraft() { return [...(placed_awacs ? [placed_awacs] : []), ...placed_targets]; }
+function getAircraft() { return [...placed_awacs, ...placed_targets]; }
 function flagUrl(country) { return `https://flagcdn.com/w80/${country.toLowerCase()}.png`; }
 
 function createOption(data, type) {
@@ -71,7 +77,7 @@ function openPicker(type) {
 function beginPlacement(data, type) {
 	byId('picker').close();
 	pending_placement = { data, type };
-	byId('placement-hint').textContent = `Click the map to place ${data.name}${type === 'awacs' && placed_awacs ? ' (replaces current AWACS)' : ''} · Esc to cancel`;
+	byId('placement-hint').textContent = `Click the map to place ${data.name} · Esc to cancel`;
 	byId('placement-hint').hidden = false;
 	byId('map-shell').classList.add('placing');
 }
@@ -100,12 +106,13 @@ function makeAircraft(data, type, position, altitude = 30000, heading = 45) {
 }
 
 function placeAircraft(data, type, position, altitude, heading) {
+	if (getAircraft().length >= 500) { cancelPlacement(); setStatus('Scenarios support up to 500 aircraft.'); return; }
 	if (type === 'awacs') {
-		if (placed_awacs) placed_awacs.element.remove();
-		placed_awacs = makeAircraft(data, type, position, altitude, heading);
-		selectAircraft(placed_awacs);
+		const aircraft = makeAircraft(data, type, position, altitude, heading);
+		placed_awacs.push(aircraft);
+		selectAircraft(aircraft);
 	} else {
-		const aircraft = makeAircraft(data, type, position, altitude || 15000, heading);
+		const aircraft = makeAircraft(data, type, position, altitude ?? 15000, heading);
 		placed_targets.push(aircraft); selectAircraft(aircraft);
 	}
 	saveScenario(); scheduleUpdate(); map.triggerRepaint();
@@ -120,7 +127,7 @@ function selectAircraft(aircraft) {
 function renderInspector() {
 	const aircraft = selected_aircraft;
 	if (!aircraft) {
-		byId('inspector').innerHTML = '<div class="inspector-card"><p class="eyebrow">BUILD A SCENARIO</p><h2>No AWACS placed!</h2><p class="data-note">Place one AWACS and multiple targets. Select an aircraft to adjust altitude and heading.</p></div>';
+		byId('inspector').innerHTML = '<div class="inspector-card"><p class="eyebrow">BUILD A SCENARIO</p><h2>Select an aircraft</h2><p class="data-note">Place multiple AWACS and targets. Select an aircraft to adjust altitude and heading.</p></div>';
 		return;
 	}
 	byId('inspector').innerHTML = `<section class="inspector-card"><div class="inspector-title"><div><p class="eyebrow">${aircraft.type === 'awacs' ? 'AWACS / SELECTED' : 'TARGET / SELECTED'}</p><h2 id="selected-name"></h2></div><button id="delete-aircraft" class="close" aria-label="Delete selected aircraft" title="Delete aircraft">×</button></div><label for="aircraft-altitude">Altitude above sea level<output id="altitude-value"></output></label><input id="aircraft-altitude" type="range" min="${aircraft.type === 'awacs' ? 3000 : 0}" max="60000" step="500"><div class="range-ends"><span>${aircraft.type === 'awacs' ? '3,000' : '0'} ft</span><span>60,000 ft</span></div>${aircraft.type === 'awacs' ? '<label for="aircraft-heading">Heading · clockwise from north<output id="heading-value"></output></label><input id="aircraft-heading" type="range" min="0" max="359" step="1"><div class="range-ends"><span>000° N</span><span>359° N</span></div>' : ''}<div id="aircraft-stats" class="stats"></div><div id="aircraft-result" class="result"></div></section>`;
@@ -139,7 +146,9 @@ function renderInspector() {
 	}
 	byId('delete-aircraft').onclick = () => {
 		aircraft.element.remove();
-		if (aircraft.type === 'awacs') placed_awacs = null;
+		if (aircraft.type === 'awacs') {
+			placed_awacs = placed_awacs.filter(item => item !== aircraft);
+		}
 		else placed_targets = placed_targets.filter(item => item !== aircraft);
 		selectAircraft(null); saveScenario(); scheduleUpdate(); map.triggerRepaint();
 	};
@@ -157,7 +166,7 @@ function updateInspectorValues() {
 	if (aircraft.type === 'awacs') {
 		byId('heading-value').textContent = `${String(aircraft.heading).padStart(3, '0')}°`;
 		entries.push(['Instrument range', `${aircraft.data.instrument_range} km`], ['Field of view', `${aircraft.data.coverage}°`], ['Airframe range', `${formatNumber(aircraft.data.airframe_range)} km`]);
-	} else entries.push(['RCS (illustrative)', `${aircraft.data.rcs} m²`], ['Slant distance', aircraft.result.distance == null ? '—' : `${aircraft.result.distance.toFixed(1)} km`]);
+	} else entries.push(['RCS (illustrative)', `${aircraft.data.rcs} m²`], ['Nearest AWACS slant distance', aircraft.result.distance == null ? '—' : `${aircraft.result.distance.toFixed(1)} km`], ['Combined detection probability (P_d)', aircraft.result.P_d == null ? 'Unknown' : `${(aircraft.result.P_d * 100).toFixed(1)}%`]);
 	for (const [label, value] of entries) {
 		const span = document.createElement('span'); span.textContent = label;
 		const strong = document.createElement('strong'); strong.textContent = value;
@@ -199,6 +208,7 @@ function renderAircraft() {
 	const map_canvas = map.getCanvas();
 	const width = map_canvas.clientWidth; const height = map_canvas.clientHeight;
 	const tethers = [];
+	const projected = new Map();
 	const center_longitude = map.getCenter().lng;
 	for (const aircraft of getAircraft()) {
 		const longitude = aircraft.position[0] + 360 * Math.round((center_longitude - aircraft.position[0]) / 360);
@@ -209,6 +219,7 @@ function renderAircraft() {
 		const clip_w = matrix[3] * point.x + matrix[7] * point.y + matrix[11] * point.z + matrix[15];
 		const screen_x = (clip_x / clip_w + 1) * width / 2;
 		const screen_y = (1 - clip_y / clip_w) * height / 2;
+		if (clip_w > 0) projected.set(aircraft, { x: screen_x, y: screen_y });
 		const visible = clip_w > 0 && screen_x > -100 && screen_x < width + 100 && screen_y > -100 && screen_y < height + 100;
 		aircraft.element.hidden = !visible;
 		if (!visible) continue;
@@ -218,16 +229,30 @@ function renderAircraft() {
 		if (is_3d) tethers.push(`<line x1="${screen_x}" y1="${screen_y}" x2="${ground_point.x}" y2="${ground_point.y}"/>`);
 	}
 	byId('tethers').innerHTML = tethers.join('');
+	const lines = [];
+	if (byId('show-sight-lines').checked) {
+		for (const [awacs, target] of sight_pairs) {
+			const start = projected.get(awacs); const end = projected.get(target);
+			if (start && end) lines.push(`<line x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}"/>`);
+		}
+	}
+	byId('sight-lines').innerHTML = lines.join('');
 }
 
 function updateMarkerStates() {
+	sight_pairs = [];
 	for (const target of placed_targets) {
-		target.result = placed_awacs ? classifyTarget(placed_awacs, target, getElevation) : { state: 'LOST', reason: 'No AWACS placed' };
+		if (byId('show-sight-lines').checked) {
+			for (const awacs of placed_awacs) {
+				if (traceVisibility(awacs.position, awacs.altitude * feet_to_meters, target.position, target.altitude * feet_to_meters, getElevation).state === 'VISIBLE') sight_pairs.push([awacs, target]);
+			}
+		}
+		target.result = classifyWithAwacs(placed_awacs, target, getElevation);
 		target.element.dataset.state = target.result.state;
-		target.element.title = `${target.data.name}: ${target.result.state} — ${target.result.reason}`;
+		target.element.title = `${target.data.name}: ${target.result.state} · P_d ${target.result.P_d == null ? 'unknown' : `${(target.result.P_d * 100).toFixed(1)}%`} — ${target.result.reason}`;
 		target.element.querySelector('.marker-label').textContent = `${target.data.name} · ${target.result.state}`;
 	}
-	if (placed_awacs) placed_awacs.element.querySelector('.marker-label').textContent = `${placed_awacs.data.name} · ${formatNumber(placed_awacs.altitude)} ft`;
+	for (const aircraft of placed_awacs) aircraft.element.querySelector('.marker-label').textContent = `${aircraft.data.name} · ${formatNumber(aircraft.altitude)} ft`;
 	for (const aircraft of getAircraft()) {
 		const ground_altitude = getElevation(aircraft.position);
 		if (ground_altitude != null && aircraft.altitude * feet_to_meters < ground_altitude) {
@@ -238,14 +263,19 @@ function updateMarkerStates() {
 		}
 	}
 	const detected_count = placed_targets.filter(target => ['DETECT', 'LOCK'].includes(target.result.state)).length;
-	byId('track-count').textContent = `${placed_targets.length} TARGETS ON MAP · ${detected_count} DETECTED`;
+	byId('track-count').textContent = `${placed_awacs.length} AWACS · ${placed_targets.length} TARGETS · ${detected_count} DETECTED`;
 	updateInspectorValues();
+	map?.triggerRepaint();
 }
 
 function scheduleUpdate() {
 	update_revision++; clearTimeout(update_timer);
-	// Clear stale coverage immediately while a newer terrain calculation is pending.
-	map?.getSource('coverage')?.setData({ type: 'FeatureCollection', features: [] });
+	for (const aircraft of placed_awacs) {
+		const entry = coverage_cache.get(aircraft);
+		if (entry && entry.key !== coverageKey(aircraft)) coverage_cache.delete(aircraft);
+	}
+	// Keep valid cached coverage while only changed AWACS are recalculated.
+	publishCoverage();
 	updateMarkerStates(); update_timer = setTimeout(updateCoverage, 250);
 }
 
@@ -255,79 +285,161 @@ function unwrapPoint(position, center) {
 
 async function updateCoverage() {
 	const revision = update_revision;
-	const aircraft = placed_awacs;
-	const empty_data = { type: 'FeatureCollection', features: [] };
-	if (!aircraft) {
-		map.getSource('coverage').setData(empty_data); map.getSource('range').setData(empty_data);
+	if (!placed_awacs.length) {
+		publishCoverage();
 		updateMarkerStates(); setStatus('Place an AWACS to explore visibility.'); return;
 	}
-	const position = [...aircraft.position];
-	const altitude = aircraft.altitude * feet_to_meters;
-	const range = aircraft.data.instrument_range * 1000;
-	const heading = aircraft.heading;
-	const coverage = aircraft.data.coverage;
-	const reference_altitude = Number(byId('overlay-altitude').value) * feet_to_meters;
-	const radial_count = Math.ceil(range / 10000);
-	const radial_step = range / radial_count;
-	const bearings = Array.from({ length: 121 }, (_, index) => heading - coverage / 2 + index * coverage / 120);
-	const grid = bearings.map(bearing => Array.from({ length: radial_count + 1 }, (_, index) => destinationPoint(position, bearing, index * radial_step)));
-	const range_ring = [position, ...grid.map(row => row.at(-1)), position].map(point => unwrapPoint(point, position[0]));
-	map.getSource('range').setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: range_ring } });
-	const terrain_positions = [...grid.flat(), ...placed_targets.map(target => target.position)];
-	for (const target of placed_targets) {
-		const distance = Math.min(2000000, maplibregl.LngLat.convert(position).distanceTo(maplibregl.LngLat.convert(target.position)));
-		const bearing = initialBearing(position, target.position);
-		for (let offset = 0; offset < distance; offset += 10000) terrain_positions.push(destinationPoint(position, bearing, offset));
+	// Target changes load their own terrain without invalidating the coverage cache.
+	const terrain_positions = [];
+	for (const aircraft of placed_awacs) {
+		terrain_positions.push(aircraft.position);
+		for (const target of placed_targets) {
+			terrain_positions.push(target.position);
+			const distance = Math.min(2000000, maplibregl.LngLat.convert(aircraft.position).distanceTo(maplibregl.LngLat.convert(target.position)));
+			const bearing = initialBearing(aircraft.position, target.position);
+			for (let offset = 0; offset < distance; offset += 10000) terrain_positions.push(destinationPoint(aircraft.position, bearing, offset));
+		}
 	}
-	setStatus('Sampling terrain & calculating line of sight…');
 	await ensureTerrain(terrain_positions);
 	if (revision !== update_revision) return;
 	updateMarkerStates();
-	if (!byId('show-coverage').checked) { setStatus('Coverage overlay hidden · target detection active'); return; }
-	const features = [];
-	let unknown_count = 0;
-	for (let bearing_index = 0; bearing_index < bearings.length - 1; bearing_index++) {
-		for (let radial_index = 0; radial_index < radial_count; radial_index++) {
-			const distance = (radial_index + 0.5) * radial_step;
-			const bearing = (bearings[bearing_index] + bearings[bearing_index + 1]) / 2;
-			const sample_position = destinationPoint(position, bearing, distance);
-			const visibility = traceVisibility(position, altitude, sample_position, reference_altitude, getElevation);
-			if (visibility.state === 'UNKNOWN') unknown_count++;
-			const coordinates = [grid[bearing_index][radial_index], grid[bearing_index + 1][radial_index], grid[bearing_index + 1][radial_index + 1], grid[bearing_index][radial_index + 1], grid[bearing_index][radial_index]].map(point => unwrapPoint(point, position[0]));
-			features.push({ type: 'Feature', properties: { state: visibility.state }, geometry: { type: 'Polygon', coordinates: [coordinates] } });
+	for (const aircraft of placed_awacs) {
+		const key = coverageKey(aircraft);
+		let entry = coverage_cache.get(aircraft);
+		if (!entry || entry.key !== key) {
+			entry = { key, features: [], unknown_count: 0, ready: false };
+			coverage_cache.set(aircraft, entry);
+			entry.pending = calculateCoverage(aircraft, entry);
 		}
-		if (bearing_index % 8 === 0) {
-			await new Promise(resolve => setTimeout(resolve, 0));
-			if (revision !== update_revision) return;
-		}
+		await entry.pending;
+		if (revision !== update_revision) return;
 	}
-	if (revision !== update_revision) return;
-	map.getSource('coverage').setData({ type: 'FeatureCollection', features });
-	setStatus(unknown_count ? `${unknown_count} coverage cells unknown · elevation unavailable (grey)` : `Terrain sampled · visibility at ${formatNumber(reference_altitude / feet_to_meters)} ft ASL`);
+	publishCoverage();
+	const unknown_count = published_coverage.reduce((count, entry) => count + entry.unknown_count, 0);
+	updateMarkerStates();
+	if (!byId('show-coverage').checked) { setStatus('Coverage overlay hidden · target detection active'); return; }
+	setStatus(unknown_count ? `${unknown_count} coverage cells unknown · elevation unavailable (grey)` : `Terrain sampled · visibility at ${formatNumber(Number(byId('overlay-altitude').value))} ft ASL`);
+}
+
+function coverageKey(aircraft) {
+	return JSON.stringify([aircraft.position, aircraft.altitude, aircraft.data.coverage === 360 ? 0 : aircraft.heading,
+		aircraft.data.coverage, aircraft.data.instrument_range, Number(byId('overlay-altitude').value)]);
+}
+
+function publishCoverage() {
+	if (!map?.getSource('coverage')) return;
+	const entries = placed_awacs.map(aircraft => {
+		const entry = coverage_cache.get(aircraft);
+		return entry?.ready && entry.key === coverageKey(aircraft) ? entry : null;
+	}).filter(Boolean);
+	const show = byId('show-coverage').checked;
+	if (show === published_show_coverage && entries.length === published_coverage.length && entries.every((entry, i) => entry === published_coverage[i])) return;
+	map.getSource('range').setData({ type: 'FeatureCollection', features: entries.map(entry => entry.range) });
+	map.getSource('coverage').setData({ type: 'FeatureCollection', features: show && entries.length ? combineCoverage(entries, polygonClipping) : [] });
+	published_coverage = entries;
+	published_show_coverage = show;
+}
+
+async function calculateCoverage(aircraft, entry) {
+	const reference_altitude = Number(byId('overlay-altitude').value) * feet_to_meters;
+		const position = [...aircraft.position];
+		const altitude = aircraft.altitude * feet_to_meters;
+		const range = aircraft.data.instrument_range * 1000;
+		const heading = aircraft.data.coverage === 360 ? 0 : aircraft.heading;
+		const coverage = aircraft.data.coverage;
+		const radial_count = Math.ceil(range / 10000);
+		const radial_step = range / radial_count;
+		const bearings = Array.from({ length: 121 }, (_, index) => heading - coverage / 2 + index * coverage / 120);
+		const grid = bearings.map(bearing => Array.from({ length: radial_count + 1 }, (_, index) => destinationPoint(position, bearing, index * radial_step)));
+		const range_ring = [position, ...grid.map(row => row.at(-1)), position].map(point => unwrapPoint(point, position[0]));
+		entry.range = { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: range_ring } };
+		setStatus('Sampling terrain & calculating line of sight…');
+		await ensureTerrain([position, ...grid.flat()]);
+		if (coverage_cache.get(aircraft) !== entry || entry.key !== coverageKey(aircraft)) return;
+		for (let bearing_index = 0; bearing_index < bearings.length - 1; bearing_index++) {
+			for (let radial_index = 0; radial_index < radial_count; radial_index++) {
+				const distance = (radial_index + 0.5) * radial_step;
+				const bearing = (bearings[bearing_index] + bearings[bearing_index + 1]) / 2;
+				const sample_position = destinationPoint(position, bearing, distance);
+				const visibility = traceVisibility(position, altitude, sample_position, reference_altitude, getElevation);
+				if (visibility.state === 'UNKNOWN') entry.unknown_count++;
+				const coordinates = [grid[bearing_index][radial_index], grid[bearing_index + 1][radial_index], grid[bearing_index + 1][radial_index + 1], grid[bearing_index][radial_index + 1], grid[bearing_index][radial_index]].map(point => unwrapPoint(point, position[0]));
+				entry.features.push({ type: 'Feature', properties: { state: visibility.state }, geometry: { type: 'Polygon', coordinates: [coordinates] } });
+			}
+			if (bearing_index % 8 === 0) {
+				await new Promise(resolve => setTimeout(resolve, 0));
+				if (coverage_cache.get(aircraft) !== entry || entry.key !== coverageKey(aircraft)) return;
+			}
+		}
+	entry.ready = true;
+}
+
+function serializeScenario() {
+	function serializeAircraft(aircraft) { return { name: aircraft.data.name, type: aircraft.type, position: aircraft.position, altitude: aircraft.altitude, heading: aircraft.heading }; }
+	const center = map.getCenter().wrap();
+	return { version: 2, aircraft: getAircraft().map(serializeAircraft), overlay_altitude: Number(byId('overlay-altitude').value), show_coverage: byId('show-coverage').checked, show_sight_lines: byId('show-sight-lines').checked,
+		view: { center: [center.lng, Math.max(-84, Math.min(84, center.lat))], zoom: map.getZoom(), pitch: map.getPitch(), bearing: map.getBearing(), is_3d } };
 }
 
 function saveScenario() {
-	function serializeAircraft(aircraft) { return { name: aircraft.data.name, type: aircraft.type, position: aircraft.position, altitude: aircraft.altitude, heading: aircraft.heading }; }
-	try { localStorage.setItem(storage_key, JSON.stringify({ aircraft: getAircraft().map(serializeAircraft), overlay_altitude: Number(byId('overlay-altitude').value) })); } catch { /* Storage may be disabled by browser privacy settings. */ }
+	try { localStorage.setItem(storage_key, JSON.stringify(serializeScenario())); } catch { /* Storage may be disabled. */ }
+}
+
+function clearMap(persist = true) {
+	cancelPlacement(); drag_state = null; map.dragPan.enable();
+	for (const aircraft of getAircraft()) aircraft.element.remove();
+	placed_awacs = []; placed_targets = []; selectAircraft(null);
+	coverage_cache = new WeakMap();
+	byId('tethers').innerHTML = '';
+	byId('sight-lines').innerHTML = '';
+	scheduleUpdate(); map.triggerRepaint();
+	if (persist) saveScenario();
+}
+
+function loadScenario(value) {
+	// Validate every entry before changing the current map.
+	const scenario = validateScenario(value, awacs_catalog, target_catalog);
+	clearMap(false);
+	for (const item of scenario.aircraft) {
+		const catalog = item.type === 'awacs' ? awacs_catalog : target_catalog;
+		const aircraft = makeAircraft(catalog.find(entry => entry.name === item.name), item.type, item.position, item.altitude, item.heading);
+		(item.type === 'awacs' ? placed_awacs : placed_targets).push(aircraft);
+	}
+	byId('overlay-altitude').value = scenario.overlay_altitude;
+	byId('overlay-value').textContent = `${formatNumber(scenario.overlay_altitude)} ft ASL`;
+	byId('show-coverage').checked = scenario.show_coverage;
+	byId('show-sight-lines').checked = scenario.show_sight_lines;
+	if (scenario.view) {
+		const view = scenario.view;
+		setView(view.is_3d);
+		map.stop(); map.jumpTo({ center: view.center, zoom: view.zoom, pitch: view.pitch, bearing: view.bearing });
+	}
+	saveScenario(); scheduleUpdate(); map.triggerRepaint();
 }
 
 function restoreScenario() {
 	try {
-		const saved_state = JSON.parse(localStorage.getItem(storage_key));
-		if (!saved_state || !Array.isArray(saved_state.aircraft)) return;
-		for (const saved_aircraft of saved_state.aircraft.slice(0, 101)) {
-			const catalog = saved_aircraft.type === 'awacs' ? awacs_catalog : target_catalog;
-			const data = catalog.find(item => item.name === saved_aircraft.name);
-			if (!data || !Array.isArray(saved_aircraft.position) || saved_aircraft.position.length !== 2 || !saved_aircraft.position.every(Number.isFinite) || Math.abs(saved_aircraft.position[1]) > 84) continue;
-			const altitude = Math.max(saved_aircraft.type === 'awacs' ? 3000 : 0, Math.min(60000, Number(saved_aircraft.altitude) || 15000));
-			if (saved_aircraft.type === 'awacs' && placed_awacs) continue;
-			const aircraft = makeAircraft(data, saved_aircraft.type, saved_aircraft.position, altitude, ((Number(saved_aircraft.heading) || 0) % 360 + 360) % 360);
-			if (saved_aircraft.type === 'awacs') placed_awacs = aircraft;
-			else placed_targets.push(aircraft);
-		}
-		byId('overlay-altitude').value = Math.max(0, Math.min(60000, Number(saved_state.overlay_altitude) || 3000));
-		byId('overlay-value').textContent = `${formatNumber(byId('overlay-altitude').value)} ft ASL`;
-	} catch { /* Ignore invalid or outdated local scenarios. */ }
+		const value = localStorage.getItem(storage_key);
+		if (value) loadScenario(JSON.parse(value));
+	} catch { /* Leave the map intact if a saved scenario is invalid. */ }
+}
+
+function exportScenario() {
+	const url = URL.createObjectURL(new Blob([JSON.stringify(serializeScenario(), null, 2)], { type: 'application/json' }));
+	const link = document.createElement('a'); link.href = url; link.download = 'awacs-battle-scenario.json';
+	document.body.append(link); link.click(); link.remove();
+	setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function importScenario(event) {
+	const file = event.target.files[0];
+	if (!file) return;
+	try {
+		if (file.size > 2 * 1024 * 1024) throw new Error('Scenario file exceeds 2 MB.');
+		loadScenario(JSON.parse(await file.text()));
+		byId('scenario-message').textContent = `Loaded ${file.name}.`;
+	} catch (error) { byId('scenario-message').textContent = `Could not load scenario: ${error.message}`; }
+	finally { event.target.value = ''; }
 }
 
 function setView(terrain_view) {
@@ -388,17 +500,22 @@ async function initializeAtlas() {
 		byId('picker-search').oninput = renderPicker;
 		byId('place-awacs').onclick = () => openPicker('awacs');
 		byId('place-target').onclick = () => openPicker('target');
+		byId('clear-map').onclick = () => { clearMap(); byId('scenario-message').textContent = 'Map cleared.'; };
+		byId('export-scenario').onclick = exportScenario;
+		byId('load-scenario').onclick = () => byId('scenario-file').click();
+		byId('scenario-file').onchange = importScenario;
 		byId('close-picker').onclick = () => byId('picker').close();
 		byId('picker').addEventListener('close', () => previous_focus?.focus());
 		byId('about-button').onclick = byId('notes-link').onclick = () => byId('notes').showModal();
 		byId('close-notes').onclick = () => byId('notes').close();
 		byId('terrain-button').onclick = () => setView(true);
 		byId('flat-button').onclick = () => setView(false);
-		byId('home-button').onclick = () => map.flyTo({ center: placed_awacs?.position || [78.7, 30.5], zoom: 6.3, pitch: is_3d ? 55 : 0, bearing: 0 });
-		byId('show-coverage').onchange = scheduleUpdate;
+		byId('home-button').onclick = () => map.flyTo({ center: placed_awacs[0]?.position || [78.7, 30.5], zoom: 6.3, pitch: is_3d ? 55 : 0, bearing: 0 });
+		byId('show-coverage').onchange = () => { saveScenario(); scheduleUpdate(); };
+		byId('show-sight-lines').onchange = () => { saveScenario(); updateMarkerStates(); };
 		byId('overlay-altitude').oninput = event => { byId('overlay-value').textContent = `${formatNumber(event.target.value)} ft ASL`; saveScenario(); scheduleUpdate(); };
 		document.addEventListener('keydown', event => { if (event.key === 'Escape') cancelPlacement(); });
-		window.addEventListener('online', () => scheduleUpdate());
+		window.addEventListener('online', () => { coverage_cache = new WeakMap(); scheduleUpdate(); });
 	} catch (error) {
 		setStatus(error.message); byId('placement-hint').hidden = false;
 		byId('placement-hint').textContent = `${error.message} Serve this folder through HTTP/HTTPS, not file://.`;
