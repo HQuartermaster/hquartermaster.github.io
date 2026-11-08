@@ -135,7 +135,7 @@
       "name": "M51",
       "country": "France",
       "country_code": "FR",
-      "range": 1000,
+      "range": 9600,
       "MIRV": true,
       "n_MIRV": 8,
       "warhead_kt": 125,

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>Kurukshetra — A Chronology of the War</title>
+ <meta name="description" content="An interactive dynastic reconstruction of the Mahabharata War. Trace Sudas, inspect the kings of Magadha, and test every assumption against cited texts.">
+ <meta name="theme-color" content="#10110f">
+ <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+ <link rel="preload" href="assets/eczar-regular.ttf" as="font" type="font/ttf" crossorigin>
+ <link rel="stylesheet" href="style.css">
+ <script defer src="app.bundle.js"></script>
+</head>
+<body>
+<a class="skip" href="#explorer">Skip to chronology explorer</a>
+<header class="site-header wrap">
+ <a class="brand" href="#"><img src="assets/mark.svg" width="32" height="32" alt=""><span>KURUKSHETRA<span class="brand-sub">THE CHRONOLOGY PROJECT</span></span></a>
+ <nav aria-label="Main navigation"><a href="#explorer">Explorer</a><a href="#methodology">Methodology</a><a href="#sources">Sources <span>↗</span></a></nav>
+</header>
+<main>
+<section class="hero wrap">
+ <div class="eyebrow"><span class="small-rule"></span> HISTORICAL CHRONOLOGY / INTERACTIVE ANALYSIS</div>
+ <h1>Dating the<br>Mahābhārata War</h1>
+ <p class="intro">A dynastic reconstruction using the proposed date of the Battle of Ten Kings, the accession of Bimbisara, and reign lengths preserved in Sanskrit and Buddhist sources.</p>
+ <a class="text-link" href="#explorer">Open chronology model <span>↓</span></a>
+ <svg class="wheel" viewBox="0 0 420 420" aria-hidden="true"><defs><pattern id="dots" width="21" height="21" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="currentColor"/></pattern></defs><circle cx="210" cy="210" r="199" fill="url(#dots)" stroke="currentColor"/><circle cx="210" cy="210" r="176"/><circle cx="210" cy="210" r="151"/><circle cx="210" cy="210" r="38"/><circle cx="210" cy="210" r="10"/><g id="spokes"></g><path d="M210 3v45M210 372v45M3 210h45M372 210h45"/></svg>
+ <div class="hero-foot"><span>कालनिरूपण</span><span>GENEALOGICAL AND REGNAL ANALYSIS</span></div>
+</section>
+
+<section class="explorer-section" id="explorer">
+<div class="wrap">
+ <div class="section-top"><div><div class="eyebrow">01 / CHRONOLOGY MODEL</div><h2>Chronological estimates</h2></div><div class="actions"><button id="share" class="quiet">Copy scenario link ↗</button><button id="reset" class="quiet">Reset ↺</button></div></div>
+ <div class="explorer-grid">
+  <aside class="controls" aria-label="Chronology assumptions">
+   <div class="panel-top"><h3>Model parameters</h3><span class="gold-dot"></span></div>
+   <label class="select-label" for="mode">Magadha reconstruction</label>
+   <select id="mode"><option value="hybrid">Hybrid · 9 stated + 21 averaged</option><option value="averaged">All reigns averaged</option><option value="vayu">Transmitted Vayu durations</option><option value="matsya">Matsya variants + gap placeholders</option></select>
+   <p class="control-note" id="mode-note"></p>
+   <div class="control-group"><div class="control-title"><label for="mean">Average reign</label><output for="mean" id="mean-out"></output></div><input id="mean" type="range" min="8" max="40" step="0.1"><div class="range-ends"><span>8 years</span><span>40 years</span></div></div>
+   <div class="control-group"><div class="control-title"><label for="spread">Average range</label><output for="spread" id="spread-out"></output></div><input id="spread" type="range" min="0" max="8" step="0.5"><p class="control-note">A sensitivity interval for the common average, not a statistical confidence interval.</p></div>
+   <div class="control-divider"></div><div class="eyebrow small">THE EARLIER ANCHOR</div>
+   <div class="control-group"><div class="control-title"><label for="botk">Battle of Ten Kings</label><output for="botk" id="botk-out"></output></div><input id="botk" type="range" min="1300" max="1450" step="1"><div class="range-ends"><span>1300 BCE</span><span>1450 BCE</span></div></div>
+   <div class="control-group"><div class="control-title"><label for="generation">Generation length</label><output for="generation" id="generation-out"></output></div><input id="generation" type="range" min="20" max="40" step="0.5"><p class="control-note">Four father-to-son links from Sudas to Drupada.<sup><a href="#source-3">3</a></sup></p></div>
+   <div class="control-group"><div class="control-title"><label for="genSpread">Generation range</label><output for="genSpread" id="genSpread-out"></output></div><input id="genSpread" type="range" min="0" max="10" step="0.5"></div>
+   <details class="advanced"><summary>Event ages & additional reigns <span>+</span></summary><div class="control-group"><div class="control-title"><label for="offset">Drupada–Sudas event-age difference</label><output for="offset" id="offset-out"></output></div><input id="offset" type="range" min="-20" max="80" step="1"><p class="control-note">Positive means Drupada was older at his battle than Sudas was at his. An explicit assumption, not a supplied age.</p></div><div class="control-group"><div class="control-title"><label for="extra">Additional Magadha reigns</label><output for="extra" id="extra-out"></output></div><input id="extra" type="range" min="0" max="12" step="1"><p class="control-note">Hypothetical missing rulers; each receives the same average.</p></div></details>
+   <div class="fixed-anchor"><span class="lock-icon">◆</span><div><span>BIMBISARA’S ACCESSION</span><strong>543 BCE <small>fixed</small></strong></div></div>
+  </aside>
+  <div class="results">
+   <div class="result-head"><div class="eyebrow">PROPOSED MAHABHARATA WAR DATE</div><span class="tag" id="fit-tag"></span></div>
+   <div class="date-display" aria-live="polite" aria-atomic="true"><span class="circa">c.</span><span id="main-date">1240</span><span class="bce">BCE</span></div>
+   <div class="result-meta"><span id="date-caption"></span><span id="exact-date"></span></div>
+   <div class="comparison">
+    <div><span class="eyebrow small">FORWARD FROM SUDAS</span><strong id="forward-date"></strong><span id="forward-formula" class="formula"></span></div>
+    <div><span class="eyebrow small">BACKWARD FROM BIMBISARA</span><strong id="backward-date"></strong><span id="backward-formula" class="formula"></span></div>
+   </div>
+   <div class="convergence"><span class="mini-symbol">⟷</span><div><strong id="convergence-title"></strong><p id="convergence-body"></p></div></div>
+   <div class="overview" id="overview" aria-label="Comparison of estimated date ranges"></div>
+   <div class="method-inline"><div class="eyebrow small">MODEL INTERPRETATION</div><p id="live-method"></p></div>
+  </div>
+ </div>
+
+ <div class="timeline-panel">
+  <div class="timeline-header"><div><h3>Dynastic timeline</h3><p>Dates run from older to younger. Select a reign to view its duration and source.</p></div><div class="legend"><span><i class="stated"></i>Text-stated years</span><span><i class="averaged"></i>Averaged reign</span><span><i class="generation"></i>Generation / event offset</span></div></div>
+  <div class="timeline-viewport" id="timeline-scroll"><div id="timelines"></div></div>
+  <div class="inspection" id="inspection" aria-live="polite"></div>
+  <div class="timeline-bottom"><span>← Scroll horizontally to follow the full succession →</span><button class="quiet" id="download">Download reign ledger ↓</button></div>
+ </div>
+
+ <details class="crosscheck" id="kuru-section"><summary><span><span class="eyebrow small">KURU SUCCESSION</span><strong>Kuru chronology comparison</strong></span><span class="crosscheck-result" id="kuru-summary"></span><span class="plus">+</span></summary><div class="crosscheck-content"><p>The epic supplies an approximately 36-year postwar interval and a stated 60-year reign for Parikshit. Keep those years within the Kuru line; they run concurrently with Magadha.<sup><a href="#source-7">7</a>–<a href="#source-11">11</a></sup></p><div class="kuru-controls"><div class="control-group"><div class="control-title"><label for="udayana">Udayana accession scenario</label><output id="udayana-out" for="udayana"></output></div><input type="range" id="udayana" min="450" max="550" step="1"><p class="control-note">A selectable accession date within the Buddha-era synchronism; 500 BCE is a scenario, not a securely dated accession.<sup><a href="#source-12">12</a></sup></p></div><div><label class="select-label" for="parikshit">Parikshit reading</label><select id="parikshit"><option value="60">60 years of reign · explicit text</option><option value="24">24 years · age-60 reconciliation</option></select><p class="control-note">The age-based alternative subtracts 36 from 60. It resolves one narrative tension; it is not an explicitly stated reign.<sup><a href="#source-10">10</a></sup></p></div></div><div class="kuru-result"><strong id="kuru-date"></strong><span id="kuru-formula"></span><p id="kuru-difference"></p></div><div class="timeline-viewport"><div id="kuru-timeline"></div></div></div></details>
+</div></section>
+
+<section class="methodology wrap" id="methodology">
+ <div class="section-top"><div><div class="eyebrow">02 / RESEARCH METHOD</div><h2>Methodology</h2></div><span class="section-mark">काल</span></div>
+ <div class="method-columns"><div class="method-prose"><p class="large-prose">Two anchors frame the argument. The first is the proposed <strong>1450–1300 BCE</strong> middle-Rigvedic window for Sudās; the second is Bimbisara’s stipulated accession in <strong>543 BCE</strong>.<sup><a href="#source-1">1</a>,<a href="#source-2">2</a>,<a href="#source-12">12</a></sup> Between them, the applet counts years through explicitly selected dynastic traditions.</p><p>On the Panchala side, four generational links connect Sudas to Drupada. Generation length and the kings’ relative ages at their battles determine the elapsed time.<sup><a href="#source-3">3</a>,<a href="#source-4">4</a></sup> On the Magadha side, the selected list contains 21 Barhadrathas, five Pradyotas, and four rulers before Bimbisara.<sup><a href="#source-5">5</a>,<a href="#source-6">6</a></sup> A shared reign average is applied only to the segments marked as averaged.</p><p>The headline reports the selected Magadha estimate, rounded to a decade. The applet independently calculates the Panchala estimate and displays both their central difference and the intersection of their sensitivity intervals. An empty intersection is reported as no overlap; neither route is moved to manufacture agreement.</p></div><div class="method-principles"><article><span>01</span><div><h3>Stated durations</h3><p>Gold segments carry a duration reported by the selected text or Wilson’s source notes. “Text-stated” describes the evidence, not an independently verified absolute date.</p></div></article><article><span>02</span><div><h3>Reconstructed durations</h3><p>The default hybrid retains nine later reigns and averages the 21 Barhadrathas. Their transmitted durations remain available in the literal modes. The default 20 years is a working scenario, not the pooled empirical mean.</p></div></article><article><span>03</span><div><h3>Parallel successions</h3><p>Kuru years are never added to Magadha years. The Udayana cross-check is shown separately, including when it produces a different date.</p></div></article></div></div>
+ <details class="source-choices"><summary>Source choices that change the result <span>+</span></summary><div class="choice-grid"><article><h3>The order of dynasties</h3><p>The app follows the Vishnu Purana order for the Magadha calculation. Buddhist chronicles place Shishunaga after Bimbisara’s successors, and Pradyota is associated with Avanti in Buddha-era accounts. Retaining the Purāṇic sequence is an explicit structural assumption.<sup><a href="#source-6">6</a>,<a href="#source-12">12</a>,<a href="#source-14">14</a></sup></p></article><article><h3>The long Barhadratha reigns</h3><p>Wilson reports Vayu reigns including 58, 67 and 100 years; Matsya readings differ. Hybrid mode replaces that block with a common average. Literal modes preserve its supplied durations rather than forcing a thirteenth-century result.<sup><a href="#source-5">5</a></sup></p></article><article><h3>The war boundary</h3><p>Somapi’s accession is placed at the war boundary as a reconstruction convention. Likewise, Drupada’s generation is related to the war using the event-age control. Neither boundary is an independently dated inscription.</p></article><article><h3>Parikshit’s reign and age</h3><p>The Sauptika Parva gives 60 years of rule; Ganguli’s Adi Parva also describes death at age 60. These produce different elapsed-year models when accession follows the war by approximately 36 years. Both readings are exposed in the Kuru cross-check.<sup><a href="#source-9">9</a>,<a href="#source-10">10</a></sup></p></article></div></details>
+</section>
+
+<section class="calibration-section"><div class="wrap"><div class="section-top"><div><div class="eyebrow">03 / COMPARATIVE DATA</div><h2>Reign-length calibration</h2></div><span class="section-mark">r̄</span></div><p class="section-intro">The pooled average equals total regnal years divided by the number of rulers. This ancient-Indian comparison combines named chronicle traditions and a reconstructed Gupta interval. The records differ in their chronological reliability.</p><div class="calibration-layout"><div class="table-scroll"><table><caption class="sr-only">Comparative reign-length dataset</caption><thead><tr><th>Dynasty / period</th><th>Years</th><th>Rulers</th><th>Mean</th><th>Source</th></tr></thead><tbody id="calibration-table"></tbody><tfoot><tr><th>Pooled sample</th><td>1119</td><td>87</td><td>12.86</td><td></td></tr></tfoot></table></div><aside class="calibration-note"><div class="eyebrow small">COMPARATIVE AVERAGE</div><div class="baseline-number">12.86<span>years / ruler</span></div><p>Short successions lower the pooled mean. Removing the Shishunaga and Nanda blocks gives 15.59 years across 66 rulers. Either value can be applied to the model to measure the effect of the calibration sample.</p><button class="gold-button" id="apply-pooled">Apply pooled mean · 12.86 →</button><button class="outline-button" id="apply-reduced">Apply reduced sample · 15.59 →</button></aside></div></div></section>
+
+<section class="evidence wrap" id="evidence"><div class="section-top"><div><div class="eyebrow">04 / REGNAL RECORDS</div><h2>Reign data</h2></div><span id="ledger-count" class="tag"></span></div><div class="table-scroll ledger-scroll"><table><caption class="sr-only">All reigns used in the selected Magadha reconstruction</caption><thead><tr><th>Ruler</th><th>House</th><th>Used</th><th>Evidence in model</th><th>Vayu</th><th>Matsya</th><th>Source</th></tr></thead><tbody id="ledger"></tbody></table></div></section>
+
+<section class="sources-section" id="sources"><div class="wrap"><div class="section-top"><div><div class="eyebrow">05 / BIBLIOGRAPHY</div><h2>References and textual readings</h2></div><span class="section-mark">ग्रन्थ</span></div><p class="section-intro">Numbered citations refer to the sources below. Primary texts supply transmitted relationships and durations; scholarly works provide historical context and chronological comparisons.</p><ol class="source-list" id="source-list"></ol></div></section>
+</main>
+<footer class="wrap"><a class="brand" href="#"><img src="assets/mark.svg" width="28" height="28" alt=""><span>KURUKSHETRA</span></a><p>Dynastic chronology model · Sources and parameters documented.</p><a href="#explorer">Return to chronology model ↑</a></footer>
+<div class="toast" id="toast" role="status"></div>
+</body></html>
